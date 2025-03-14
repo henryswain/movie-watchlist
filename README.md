@@ -1,109 +1,51 @@
-# FastAPI Todo App
+# Movie Watchlist
 
-![demo](todo_app.gif)
+A web application to track and manage your movie watchlist. Keep track of movies you've watched and movies you plan to watch in the future.
 
-## 1. Python virtual environment
+## Features
 
-```powershell
+- Add movies with title, director, and release year information
+- Mark movies as watched or unwatched
+- Filter your list to show all movies, only watched movies, or only unwatched movies
+- Edit movie details
+- Delete movies from your list
+- Toggle watched/unwatched status with a single click
+
+## Technologies Used
+
+- **Backend**: FastAPI (Python)
+- **Frontend**: 
+  - HTML
+  - CSS
+  - JavaScript
+  - Bootstrap 5 for responsive design
+  - Font Awesome 6 for icons
+
+## Installation
+
+1. Clone this repository
+```bash
+git clone https://github.com/yourusername/movie-watchlist.git
+cd movie-watchlist
+
+2. Create and activate a virtual environment
+# For Windows
 python -m venv venv
-.\venv\Scripts\activate
-```
+venv\Scripts\activate
 
-```powershell
-deactivate
-```
-
-## 2. pip
-
-Pip is automatically installed during a Python installation. You can verify whether pip is
-installed by running the following command in your terminal:
-
-```powershell
-python -m pip list
-```
-
-The preceding command should return a list of packages installed.
-
-### Basic commands
-
-With pip installed, let's learn its basic commands. To install the FastAPI package with
-pip, we run the following command:
-
-```powershell
-pip install fastapi
-```
-
-On a Unix operating system, such as Mac or Linux, in some cases, the sudo keyword is
-prepended to install global packages.
-
-To uninstall a package, the following command is used:
-
-```powershell
-pip uninstall fastapi
-```
-
-To collate the current packages installed in a project into a file, we use the following
-freeze command:
-
-```powershell
-pip freeze > requirements.txt
-```
-
-The > operator tells bash to save the output from the command into the
-`requirements.txt` file. This means that running pip freeze returns an output of
-all the currently installed packages.
-
-To install packages from a file such as the `requirements.txt` file, the following
-command is used:
-
-```powershell
-pip install -r requirements.txt
-```
-
-The preceding command is mostly used in deployment.
-
-## uvicorn
-
-We'll begin by installing the dependencies required for our application in the todos
-folder we created earlier. The dependencies are the following:
-
-- fastapi: The framework on which we'll build our application.
-- uvicorn: An Asynchronous Server Gateway Interface module to run our application.
-
-First, activate your development environment by running the following command in your
-project directory:
-
-```powershell
+# For macOS/Linux
+python3 -m venv venv
 source venv/bin/activate
-```
 
-Then, install the dependencies as follows:
-
-```powershell
-(venv)$ pip install fastapi uvicorn
-```
-
-The next step is to start our application using uvicorn. In your terminal, run the
-following command:
-
-```powershell
-(venv)$ uvicorn main:app --port 8000 --reload
-```
-
-In the preceding command, uvicorn takes the following arguments:
-
-- `file:instance`: The file containing the instance of FastAPI and the name
-  variable holding the FastAPI instance.
-- `--port PORT`: The port the application will be served on.
-- `--reload`: An optional argument included to restart the application on every
-  file change.
-
-```powershell
-python -m venv venv
-.\venv\Scripts\activate
+3. Install the required dependencies
 pip install fastapi uvicorn
-# pip freeze > requirements.txt
-pip freeze | Out-File -Encoding UTF8 requirements.txt
 
-# pip uninstall -r requirements.txt -y
+4. Run the application
+uvicorn main:app --reload
+
+5. Open your browser and navigate to http://127.0.0.1:8000
 ```
+# Demo
+![Example](pic1.png)
+![Edit Function](pic2.png)
+![Filter Function](pic3.png)
