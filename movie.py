@@ -11,6 +11,7 @@ max_id: int = 0
 
 @movie_router.post("", status_code=status.HTTP_201_CREATED)
 async def add_movie(movie: MovieRequest) -> Movie:
+    print("add movie called: ", movie)
     global max_id
     max_id += 1  # auto increment ID
     new_movie = Movie(

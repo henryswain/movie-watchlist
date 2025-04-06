@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 # Include the movie router
-app.include_router(movie_router, tags=["Movies"], prefix="/movies")
+app.include_router(movie_router, tags=["Movies"], prefix="/api/movies")
 
 # Mount static files
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
