@@ -87,9 +87,9 @@
 
     const title = titleInput.value
     const comment = commentInput.value  // Changed from director
-    const year = ratingInput.value
+    const rating = ratingInput.value
     const watched = !!alreadyWatchedInput.value
-    console.log("Adding movie:", title, comment, year, watched);  // Changed log message
+    console.log("Adding movie:", title, comment, rating, watched);  // Changed log message
 
     const msg = document.getElementById('msg');
     if (!title) {
@@ -100,7 +100,7 @@
       if (msg) msg.innerHTML = 'Comment cannot be blank';
       return;
     }
-    if (!year) {
+    if (!rating) {
       if (msg) msg.innerHTML = 'Rating cannot be blank';
       return;
     }
@@ -112,7 +112,7 @@
       body: JSON.stringify({
         title,
         comment,  // Changed from director
-        rating: parseInt(year),
+        rating: parseInt(rating),
         watched,
       })
     })
@@ -147,9 +147,9 @@
   function editForm() {
     const title = editTitleInput.value
     const comment = editCommentInput.value  // Changed from director
-    const year = editRatingInput.value
+    const rating = editRatingInput.value
     const watched = editAlreadyWatchedInput.value
-    console.log("Editing movie:", selectedMovie.id, title, comment, year, watched);  // Changed log message
+    console.log("Editing movie:", selectedMovie.id, title, comment, rating, watched);  // Changed log message
     const editMsg = document.getElementById('edit-msg');
     if (!title) {
       if (editMsg) editMsg.innerHTML = 'Movie title cannot be blank';
@@ -159,7 +159,7 @@
       if (editMsg) editMsg.innerHTML = 'Comment cannot be blank';
       return;
     }
-    if (!year) {
+    if (!rating) {
       if (editMsg) editMsg.innerHTML = 'Rating cannot be blank';
       return;
     }
@@ -171,7 +171,7 @@
       body: JSON.stringify({
         title,
         comment,  // Changed from director
-        rating: parseInt(year),
+        rating: parseInt(rating),
         watched
       })
     })
@@ -179,7 +179,7 @@
       if (response.ok) {
         selectedMovie.title = title;
         selectedMovie.comment = comment;  // Changed from director
-        selectedMovie.rating = parseInt(year);
+        selectedMovie.rating = parseInt(rating);
         selectedMovie.watched = watched;
         refreshMovies();
         const closeBtn = document.getElementById('edit-close');
@@ -216,7 +216,7 @@
   function resetForm() {
     titleInput.value = ''
     commentInput.value = ''  // Changed from directorInput
-    ratingInoutngInput.value = ''
+    ratingInput.value = ''
     alreadyWatchedInput.value = ''
 
     editTitleInput.value = ''
@@ -300,8 +300,8 @@
               <input type="text" class="form-control" id="comment" v-model="commentInput">  <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
-              <label for="year" class="form-label">Rating</label>
-              <input type="number" class="form-control" id="year" v-model="ratingInput">
+              <label for="rating" class="form-label">Rating <i>(1 to 5 stars)</i></label>
+              <input type="number" class="form-control" id="rating" v-model="ratingInput">
             </div>
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="watched" v-model="alreadyWatchedInput">
@@ -325,7 +325,7 @@
         <div class="modal-body">
           <form id="form-edit">
             <div class="mb-3">
-              <label for="title-edit" class="form-label">Movie Title</label>
+              <label for="title-edit" class="form-label">Movie Title <i>(required)</i></label>
               <input type="text" class="form-control" id="title-edit" v-model="editTitleInput">
             </div>
             <div class="mb-3">
@@ -333,8 +333,8 @@
               <input type="text" class="form-control" id="comment-edit" v-model="editCommentInput">  <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
-              <label for="year-edit" class="form-label">Rating</label>
-              <input type="number" class="form-control" id="year-edit" v-model="editRatingInput">
+              <label for="rating-edit" class="form-label">Rating <i>(1 to 5 stars)</i></label>
+              <input type="number" class="form-control" id="rating-edit" v-model="editRatingInput">
             </div>
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="watched-edit" v-model="editAlreadyWatchedInput">
