@@ -10,12 +10,12 @@
 
   const titleInput = ref("")
   const commentInput = ref("")  // Changed from directorInput
-  const releaseYearInput = ref("")
+  const ratingInput = ref("")
   const alreadyWatchedInput = ref()
 
   const editTitleInput = ref("")
   const editCommentInput = ref("")  // Changed from editDirectorInput
-  const editReleaseYearInput = ref("")
+  const editRatingInput = ref("")
   const editAlreadyWatchedInput = ref()
 
   function filterMovies(filter) {
@@ -36,7 +36,7 @@
 
     editTitleInput.value = movie.title
     editCommentInput.value = movie.comment  // Changed from movie.director
-    editReleaseYearInput.value = movie.release_year
+    editRatingInput.value = movie.rating
     editAlreadyWatchedInput.value = movie.watched
 
     const editMsg = document.getElementById('edit-msg');
@@ -87,7 +87,7 @@
 
     const title = titleInput.value
     const comment = commentInput.value  // Changed from director
-    const year = releaseYearInput.value
+    const year = ratingInput.value
     const watched = !!alreadyWatchedInput.value
     console.log("Adding movie:", title, comment, year, watched);  // Changed log message
 
@@ -101,7 +101,7 @@
       return;
     }
     if (!year) {
-      if (msg) msg.innerHTML = 'Release year cannot be blank';
+      if (msg) msg.innerHTML = 'Rating cannot be blank';
       return;
     }
     fetch(api, {
@@ -112,7 +112,7 @@
       body: JSON.stringify({
         title,
         comment,  // Changed from director
-        release_year: parseInt(year),
+        rating: parseInt(year),
         watched,
       })
     })
@@ -147,7 +147,7 @@
   function editForm() {
     const title = editTitleInput.value
     const comment = editCommentInput.value  // Changed from director
-    const year = editReleaseYearInput.value
+    const year = editRatingInput.value
     const watched = editAlreadyWatchedInput.value
     console.log("Editing movie:", selectedMovie.id, title, comment, year, watched);  // Changed log message
     const editMsg = document.getElementById('edit-msg');
@@ -160,7 +160,7 @@
       return;
     }
     if (!year) {
-      if (editMsg) editMsg.innerHTML = 'Release year cannot be blank';
+      if (editMsg) editMsg.innerHTML = 'Rating cannot be blank';
       return;
     }
     fetch(`${api}/${selectedMovie.id}`, {
@@ -171,7 +171,7 @@
       body: JSON.stringify({
         title,
         comment,  // Changed from director
-        release_year: parseInt(year),
+        rating: parseInt(year),
         watched
       })
     })
@@ -179,7 +179,7 @@
       if (response.ok) {
         selectedMovie.title = title;
         selectedMovie.comment = comment;  // Changed from director
-        selectedMovie.release_year = parseInt(year);
+        selectedMovie.rating = parseInt(year);
         selectedMovie.watched = watched;
         refreshMovies();
         const closeBtn = document.getElementById('edit-close');
@@ -216,12 +216,12 @@
   function resetForm() {
     titleInput.value = ''
     commentInput.value = ''  // Changed from directorInput
-    releaseYearInput.value = ''
+    ratingInoutngInput.value = ''
     alreadyWatchedInput.value = ''
 
     editTitleInput.value = ''
     editCommentInput.value = ''  // Changed from editDirectorInput
-    editReleaseYearInput.value = ''
+    editRatingInput.value = ''
     editAlreadyWatchedInput.value = ''
   }
 
@@ -268,7 +268,7 @@
 
       <div v-for="movie in filteredData" :class="`movie-card ${movie.watched ? 'watched' : 'unwatched'}`">
         <div class="movie-header">
-          <h4>{{movie.title}} ({{movie.release_year}})</h4>
+          <h4>{{movie.title}} ({{movie.rating}})</h4>
           <span :class="`badge ${movie.watched ? 'bg-success' : 'bg-warning'}`">{{ movie.watched ? 'Watched' : 'To Watch' }}</span>
         </div>
         <p class="text-secondary">Comment: {{movie.comment}}</p>  <!-- Changed from Director -->
@@ -292,7 +292,7 @@
         <div class="modal-body">
           <form id="form-add">
             <div class="mb-3">
-              <label for="title" class="form-label">Movie Title</label>
+              <label for="title" class="form-label">Movie Title <i>(required)</i></label>
               <input type="text" class="form-control" id="title" v-model="titleInput">
             </div>
             <div class="mb-3">
@@ -300,8 +300,8 @@
               <input type="text" class="form-control" id="comment" v-model="commentInput">  <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
-              <label for="year" class="form-label">Release Year</label>
-              <input type="number" class="form-control" id="year" v-model="releaseYearInput">
+              <label for="year" class="form-label">Rating</label>
+              <input type="number" class="form-control" id="year" v-model="ratingInput">
             </div>
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="watched" v-model="alreadyWatchedInput">
@@ -333,8 +333,8 @@
               <input type="text" class="form-control" id="comment-edit" v-model="editCommentInput">  <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
-              <label for="year-edit" class="form-label">Release Year</label>
-              <input type="number" class="form-control" id="year-edit" v-model="editReleaseYearInput">
+              <label for="year-edit" class="form-label">Rating</label>
+              <input type="number" class="form-control" id="year-edit" v-model="editRatingInput">
             </div>
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="watched-edit" v-model="editAlreadyWatchedInput">

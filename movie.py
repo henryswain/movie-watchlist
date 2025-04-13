@@ -18,7 +18,7 @@ async def add_movie(movie: MovieRequest) -> Movie:
         id=max_id,
         title=movie.title,
         comment=movie.comment,
-        release_year=movie.release_year,
+        rating=movie.rating,
         watched=movie.watched,
     )
     movie_list.append(new_movie)
@@ -48,7 +48,7 @@ async def update_movie(movie: MovieRequest, id: int) -> dict:
         if x.id == id:
             x.title = movie.title
             x.comment = movie.comment
-            x.release_year = movie.release_year
+            x.rating = movie.rating
             x.watched = movie.watched
             return {"message": "Movie updated successfully"}
     return {"message": f"The movie with ID={id} is not found."}
