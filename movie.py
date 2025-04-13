@@ -17,7 +17,7 @@ async def add_movie(movie: MovieRequest) -> Movie:
     new_movie = Movie(
         id=max_id,
         title=movie.title,
-        director=movie.director,
+        comment=movie.comment,
         release_year=movie.release_year,
         watched=movie.watched,
     )
@@ -27,6 +27,7 @@ async def add_movie(movie: MovieRequest) -> Movie:
 
 @movie_router.get("")
 async def get_movies() -> list[Movie]:
+    print("get movies called")
     return movie_list
 
 
@@ -46,7 +47,7 @@ async def update_movie(movie: MovieRequest, id: int) -> dict:
     for x in movie_list:
         if x.id == id:
             x.title = movie.title
-            x.director = movie.director
+            x.comment = movie.comment
             x.release_year = movie.release_year
             x.watched = movie.watched
             return {"message": "Movie updated successfully"}

@@ -9,12 +9,12 @@
   const api = '/api/movies';
 
   const titleInput = ref("")
-  const directorInput = ref("")
+  const commentInput = ref("")  // Changed from directorInput
   const releaseYearInput = ref("")
   const alreadyWatchedInput = ref()
 
   const editTitleInput = ref("")
-  const editDirectorInput = ref("")
+  const editCommentInput = ref("")  // Changed from editDirectorInput
   const editReleaseYearInput = ref("")
   const editAlreadyWatchedInput = ref()
 
@@ -35,7 +35,7 @@
     selectedMovie = movie;
 
     editTitleInput.value = movie.title
-    editDirectorInput.value = movie.director
+    editCommentInput.value = movie.comment  // Changed from movie.director
     editReleaseYearInput.value = movie.release_year
     editAlreadyWatchedInput.value = movie.watched
 
@@ -86,22 +86,22 @@
     console.log("Form submitted");
 
     const title = titleInput.value
-    const director = directorInput.value
+    const comment = commentInput.value  // Changed from director
     const year = releaseYearInput.value
-    const watched = alreadyWatchedInput.value
-    console.log("Adding movie:", title, director, year, watched);
+    const watched = !!alreadyWatchedInput.value
+    console.log("Adding movie:", title, comment, year, watched);  // Changed log message
 
-    const editMsg = document.getElementById('edit-msg');
+    const msg = document.getElementById('msg');
     if (!title) {
-      if (editMsg) editMsg.innerHTML = 'Movie title cannot be blank';
+      if (msg) msg.innerHTML = 'Movie title cannot be blank';
       return;
     }
-    if (!director) {
-      if (editMsg) editMsg.innerHTML = 'Director name cannot be blank';
+    if (!comment) {  // Changed validation message
+      if (msg) msg.innerHTML = 'Comment cannot be blank';
       return;
     }
     if (!year) {
-      if (editMsg) editMsg.innerHTML = 'Release year cannot be blank';
+      if (msg) msg.innerHTML = 'Release year cannot be blank';
       return;
     }
     fetch(api, {
@@ -111,7 +111,7 @@
       },
       body: JSON.stringify({
         title,
-        director,
+        comment,  // Changed from director
         release_year: parseInt(year),
         watched,
       })
@@ -146,17 +146,17 @@
 
   function editForm() {
     const title = editTitleInput.value
-    const director = editDirectorInput.value
+    const comment = editCommentInput.value  // Changed from director
     const year = editReleaseYearInput.value
     const watched = editAlreadyWatchedInput.value
-    console.log("Editing movie:", selectedMovie.id, title, director, year, watched);
+    console.log("Editing movie:", selectedMovie.id, title, comment, year, watched);  // Changed log message
     const editMsg = document.getElementById('edit-msg');
     if (!title) {
       if (editMsg) editMsg.innerHTML = 'Movie title cannot be blank';
       return;
     }
-    if (!director) {
-      if (editMsg) editMsg.innerHTML = 'Director name cannot be blank';
+    if (!comment) {  // Changed validation message
+      if (editMsg) editMsg.innerHTML = 'Comment cannot be blank';
       return;
     }
     if (!year) {
@@ -170,7 +170,7 @@
       },
       body: JSON.stringify({
         title,
-        director,
+        comment,  // Changed from director
         release_year: parseInt(year),
         watched
       })
@@ -178,7 +178,7 @@
     .then(response => {
       if (response.ok) {
         selectedMovie.title = title;
-        selectedMovie.director = director;
+        selectedMovie.comment = comment;  // Changed from director
         selectedMovie.release_year = parseInt(year);
         selectedMovie.watched = watched;
         refreshMovies();
@@ -215,12 +215,12 @@
 
   function resetForm() {
     titleInput.value = ''
-    directorInput.value = ''
+    commentInput.value = ''  // Changed from directorInput
     releaseYearInput.value = ''
     alreadyWatchedInput.value = ''
 
     editTitleInput.value = ''
-    editDirectorInput.value = ''
+    editCommentInput.value = ''  // Changed from editDirectorInput
     editReleaseYearInput.value = ''
     editAlreadyWatchedInput.value = ''
   }
@@ -271,7 +271,7 @@
           <h4>{{movie.title}} ({{movie.release_year}})</h4>
           <span :class="`badge ${movie.watched ? 'bg-success' : 'bg-warning'}`">{{ movie.watched ? 'Watched' : 'To Watch' }}</span>
         </div>
-        <p class="text-secondary">Director: {{movie.director}}</p>
+        <p class="text-secondary">Comment: {{movie.comment}}</p>  <!-- Changed from Director -->
         <div class="options">
           <i @click="toggleWatched(movie.id)" :class="`fas ${movie.watched ? 'fa-eye-slash' : 'fa-eye'}`"></i>
           <i @click="tryEditMovie(movie.id)" class="fas fa-edit" data-bs-toggle="modal" data-bs-target="#editModal"></i>
@@ -296,8 +296,8 @@
               <input type="text" class="form-control" id="title" v-model="titleInput">
             </div>
             <div class="mb-3">
-              <label for="director" class="form-label">Director</label>
-              <input type="text" class="form-control" id="director" v-model="directorInput">
+              <label for="comment" class="form-label">Comment</label>  <!-- Changed from Director -->
+              <input type="text" class="form-control" id="comment" v-model="commentInput">  <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
               <label for="year" class="form-label">Release Year</label>
@@ -329,8 +329,8 @@
               <input type="text" class="form-control" id="title-edit" v-model="editTitleInput">
             </div>
             <div class="mb-3">
-              <label for="director-edit" class="form-label">Director</label>
-              <input type="text" class="form-control" id="director-edit" v-model="editDirectorInput">
+              <label for="comment-edit" class="form-label">Comment</label>  <!-- Changed from Director -->
+              <input type="text" class="form-control" id="comment-edit" v-model="editCommentInput">  <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
               <label for="year-edit" class="form-label">Release Year</label>
