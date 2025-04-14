@@ -128,11 +128,11 @@ function addMovieInfo() {
     if (msg) msg.innerHTML = "Movie title cannot be blank";
     return;
   }
-  if (!comment) {
+ /* if (!comment) {
     // Changed validation message
     if (msg) msg.innerHTML = "Comment cannot be blank";
     return;
-  }
+  }*/
   if (!rating) {
     if (msg) msg.innerHTML = "Rating cannot be blank";
     return;
@@ -198,11 +198,11 @@ function editForm() {
     if (editMsg) editMsg.innerHTML = "Movie title cannot be blank";
     return;
   }
-  if (!comment) {
+/*  if (!comment) {
     // Changed validation message
     if (editMsg) editMsg.innerHTML = "Comment cannot be blank";
     return;
-  }
+  }*/
   if (!rating) {
     if (editMsg) editMsg.innerHTML = "Rating cannot be blank";
     return;
@@ -340,6 +340,15 @@ onMounted(() => {
           <span
             :class="`badge ${movie.watched ? 'bg-success' : 'bg-warning'}`"
             >{{ movie.watched ? "Watched" : "To Watch" }}</span
+          >
+        </div>
+        <div class="star-display">
+          <span
+            v-for="i in 5"
+            :key="i"
+            class="star"
+            :class="{ filled: i <= movie.rating }"
+            >★</span
           >
         </div>
         <p class="text-secondary">Comment: {{ movie.comment }}</p>
@@ -509,12 +518,6 @@ onMounted(() => {
                   >★</span
                 >
               </div>
-              <input
-                type="number"
-                class="form-control"
-                id="rating-edit"
-                v-model="editRatingInput"
-              />
             </div>
             <div class="mb-3 form-check">
               <input
@@ -754,7 +757,7 @@ body {
 
 .star {
   cursor: pointer;
-  font-size: 30px;
+  font-size: 25px;
   color: #cfcfcf;
   transition: color 0.2s;
   margin-right: 5px;
@@ -766,5 +769,14 @@ body {
 
 .star-display {
   margin: 5px 0;
+}
+
+.star-dsplay .star {
+  color: #cfcfcf;
+  margin-right: 3px;
+}
+
+.star-display .star-filled {
+  color: #ffd700;
 }
 </style>
