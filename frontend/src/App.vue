@@ -132,15 +132,11 @@ function addMovieInfo() {
     // Changed validation message
     if (msg) msg.innerHTML = "Comment cannot be blank";
     return;
-  }*/
+  }
   if (!rating) {
     if (msg) msg.innerHTML = "Rating cannot be blank";
     return;
-  }
-  if (rating > 5 || rating < 1) {
-    if (msg) msg.innerHTML = "Rating must be between 1 and 5";
-    return;
-  }
+  }*/
   fetch(api, {
     method: "POST",
     headers: {
@@ -202,15 +198,11 @@ function editForm() {
     // Changed validation message
     if (editMsg) editMsg.innerHTML = "Comment cannot be blank";
     return;
-  }*/
+  }
   if (!rating) {
     if (editMsg) editMsg.innerHTML = "Rating cannot be blank";
     return;
-  }
-  if (rating > 5 || rating < 1) {
-    if (editMsg) editMsg.innerHTML = "Rating must be between 1 and 5";
-    return;
-  }
+  }*/
   fetch(`${api}/${selectedMovie.id}`, {
     method: "PUT",
     headers: {
