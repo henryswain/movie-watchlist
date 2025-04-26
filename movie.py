@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, HTTPException, status
 from jwt_auth import TokenData
-from model import Movie, MovieRequest
+from movie_model import Movie, MovieRequest
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
@@ -21,6 +21,7 @@ async def add_movie(r: MovieRequest) -> Movie:
         comment=r.comment,
     )
     # rating=r.rating,
+       # review=movie.review,  # Added review field
     # watched=r.watched,
     # movie_list.append(new_movie)
     newMovie.save()
@@ -56,6 +57,7 @@ async def update_movie(movie: MovieRequest, id: int) -> dict:
             x.title = movie.title
             x.comment = movie.comment
             x.rating = movie.rating
+            x.review = movie.review  # Added review field
             x.watched = movie.watched
             return {"message": "Movie updated successfully"}
     return {"message": f"The movie with ID={id} is not found."}

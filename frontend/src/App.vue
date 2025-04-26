@@ -13,11 +13,13 @@ const api = "/api/movies";
 const titleInput = ref("");
 const commentInput = ref(""); // Changed from directorInput
 const ratingInput = ref(0); //Starting at 0
+const reviewInput = ref(""); // Added review input for rating explanation
 const alreadyWatchedInput = ref();
 
 const editTitleInput = ref("");
 const editCommentInput = ref(""); // Changed from editDirectorInput
 const editRatingInput = ref(0);
+const editReviewInput = ref(""); // Added edit review input
 const editAlreadyWatchedInput = ref();
 
 // Star Rating Hovering state
@@ -44,8 +46,9 @@ function tryEditMovie(id) {
   selectedMovie = movie;
 
   editTitleInput.value = movie.title;
-  editCommentInput.value = movie.comment; // Changed from movie.director
+  editCommentInput.value = movie.comment;
   editRatingInput.value = movie.rating;
+  editReviewInput.value = movie.review || ""; // New: Load existing review
   editAlreadyWatchedInput.value = movie.watched;
 
   const editMsg = document.getElementById("edit-msg");
@@ -122,16 +125,18 @@ function addMovieInfo() {
   console.log("Form submitted");
 
   const title = titleInput.value;
-  const comment = commentInput.value; // Changed from director
+  const comment = commentInput.value;
   const rating = ratingInput.value;
+  const review = reviewInput.value;  
   const watched = !!alreadyWatchedInput.value;
-  console.log("Adding movie:", title, comment, rating, watched); // Changed log message
+  console.log("Adding movie:", title, comment, rating, review, watched); // Updated log message
 
   const msg = document.getElementById("msg");
   if (!title) {
     if (msg) msg.innerHTML = "Movie title cannot be blank";
     return;
   }
+  
   fetch(api, {
     method: "POST",
     headers: {
@@ -139,8 +144,9 @@ function addMovieInfo() {
     },
     body: JSON.stringify({
       title,
-      comment, // Changed from director
+      comment,
       rating: parseInt(rating),
+      review, // New: Include review in request body
       watched,
     }),
   })
@@ -173,8 +179,9 @@ function addMovieInfo() {
 
 function editForm() {
   const title = editTitleInput.value;
-  const comment = editCommentInput.value; // Changed from director
+  const comment = editCommentInput.value;
   const rating = editRatingInput.value;
+  const review = editReviewInput.value; // Get edit review input
   const watched = editAlreadyWatchedInput.value;
   console.log(
     "Editing movie:",
@@ -182,13 +189,16 @@ function editForm() {
     title,
     comment,
     rating,
+    review,
     watched
-  ); // Changed log message
+  ); // Updated log message
+  
   const editMsg = document.getElementById("edit-msg");
   if (!title) {
     if (editMsg) editMsg.innerHTML = "Movie title cannot be blank";
     return;
   }
+  
   fetch(`${api}/${selectedMovie.id}`, {
     method: "PUT",
     headers: {
@@ -196,16 +206,18 @@ function editForm() {
     },
     body: JSON.stringify({
       title,
-      comment, // Changed from director
+      comment,
       rating: parseInt(rating),
+      review, // Include review in request body
       watched,
     }),
   })
     .then((response) => {
       if (response.ok) {
         selectedMovie.title = title;
-        selectedMovie.comment = comment; // Changed from director
+        selectedMovie.comment = comment;
         selectedMovie.rating = parseInt(rating);
+        selectedMovie.review = review; // Update review in selectedMovie
         selectedMovie.watched = watched;
         refreshMovies();
         const closeBtn = document.getElementById("edit-close");
@@ -239,13 +251,15 @@ function editForm() {
 
 function resetForm() {
   titleInput.value = "";
-  commentInput.value = ""; // Changed from directorInput
+  commentInput.value = "";
   ratingInput.value = "";
+  reviewInput.value = ""; // New: Reset review input
   alreadyWatchedInput.value = "";
 
   editTitleInput.value = "";
-  editCommentInput.value = ""; // Changed from editDirectorInput
+  editCommentInput.value = "";
   editRatingInput.value = "";
+  editReviewInput.value = ""; // New: Reset edit review input
   editAlreadyWatchedInput.value = "";
 }
 
@@ -277,7 +291,7 @@ DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split('.')[0]}Z
 DTSTART:${dtstart}
 DTEND:${dtend}
 SUMMARY:Watch ${movie.title}
-DESCRIPTION:Reminder to watch ${movie.title}. Rating: ${movie.rating}. Comment: ${movie.comment}
+DESCRIPTION:Reminder to watch ${movie.title}. Rating: ${movie.rating}/5. Comment: ${movie.comment}. Review: ${movie.review || "No review provided"}
 END:VEVENT
 END:VCALENDAR`;
 
@@ -375,7 +389,14 @@ onMounted(() => {
           </span>
         </div>
         <p class="text-secondary">Comment: {{ movie.comment }}</p>
-        New: Schedule viewing section with date picker and ICS download button
+        
+        New: Rating review section showing why the user rated the movie as they did -->
+        <div v-if="movie.review" class="rating-review">
+          <h5>Why This Rating?</h5>
+          <p>{{ movie.review }}</p>
+        </div>
+        
+        <!-- Schedule viewing section with date picker and ICS download button
         <div class="schedule-viewing">
           <label :for="`watch-date-${movie.id}`" class="form-label">Select Viewing Date:</label>
           <input type="date" :id="`watch-date-${movie.id}`" v-model="selectedDates[movie.id]" class="form-control mb-2" />
@@ -426,9 +447,7 @@ onMounted(() => {
             </div>
             <div class="mb-3">
               <label for="comment" class="form-label">Comment</label>
-              <!-- Changed from Director -->
               <input type="text" class="form-control" id="comment" v-model="commentInput" />
-              <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
               <label for="rating" class="form-label">Rating <i>(1 to 5 stars)</i></label>
@@ -446,6 +465,19 @@ onMounted(() => {
                 >
               </div>
             </div>
+            
+            <!-- New: Review textarea for explaining the rating -->
+            <div class="mb-3">
+              <label for="review" class="form-label">Why this rating?</label>
+              <textarea 
+                class="form-control" 
+                id="review" 
+                v-model="reviewInput" 
+                rows="3"
+                placeholder="Explain why you gave this rating..."
+              ></textarea>
+            </div>
+            
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="watched" v-model="alreadyWatchedInput" />
               <label class="form-check-label" for="watched">Already Watched</label>
@@ -487,9 +519,7 @@ onMounted(() => {
             </div>
             <div class="mb-3">
               <label for="comment-edit" class="form-label">Comment</label>
-              <!-- Changed from Director -->
               <input type="text" class="form-control" id="comment-edit" v-model="editCommentInput" />
-              <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
               <label for="rating-edit" class="form-label">Rating <i>(1 to 5 stars)</i></label>
@@ -508,6 +538,19 @@ onMounted(() => {
               </div>
               <input type="number" class="form-control" id="rating-edit" v-model="editRatingInput" />
             </div>
+            
+            <!-- New: Edit review text area for explaining the rating -->
+            <div class="mb-3">
+              <label for="review-edit" class="form-label">Why this rating?</label>
+              <textarea 
+                class="form-control" 
+                id="review-edit" 
+                v-model="editReviewInput" 
+                rows="3"
+                placeholder="Explain why you gave this rating..."
+              ></textarea>
+            </div>
+            
             <div class="mb-3 form-check">
               <input type="checkbox" class="form-check-input" id="watched-edit" v-model="editAlreadyWatchedInput" />
               <label class="form-check-label" for="watched-edit">Already Watched</label>
@@ -522,102 +565,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/*  
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-} */
-html,
-body {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  overflow: hidden;
-  font-family: sans-serif;
-  background-color: #e5e5e5;
-}
-
-.app {
-  height: 100%;
-  width: 500px;
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  border: 0.25rem solid #abcea1;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-#addNew {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: rgba(171, 206, 161, 0.35);
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.fa-plus {
-  background-color: #abcea1;
-  padding: 3px;
-  border-radius: 3px;
-}
-
-#todos {
-  display: flex;
-  flex-direction: column;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  overflow-y: auto;
-}
-
-#todos div {
-  border: 3px solid #abcea1;
-  background-color: #e2eede;
-  border-radius: 6px;
-  padding: 5px;
-  display: grid;
-  gap: 4px;
-}
-
-#todos div .options {
-  justify-self: center;
-  display: flex;
-  gap: 20px;
-}
-
-#todos div .options i {
-  cursor: pointer;
-}
-
-#msg {
-  color: red;
-}
-
 html,
 body {
   height: 100%;
@@ -676,6 +623,7 @@ body {
   padding: 12px;
   display: grid;
   gap: 4px;
+  margin-bottom: 15px;
 }
 
 .movie-card.watched {
@@ -692,6 +640,27 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* Styling for the rating review section */
+.rating-review {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+  border-left: 4px solid #5271ff;
+}
+
+.rating-review h5 {
+  font-size: 1rem;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.rating-review p {
+  font-style: italic;
+  color: #555;
+  margin-bottom: 0;
 }
 
 .options {
