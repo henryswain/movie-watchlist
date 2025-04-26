@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class Movie(BaseModel):
-    id: int
     title: str
     comment: str
     rating: int

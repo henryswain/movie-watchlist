@@ -128,15 +128,6 @@ function addMovieInfo() {
     if (msg) msg.innerHTML = "Movie title cannot be blank";
     return;
   }
- /* if (!comment) {
-    // Changed validation message
-    if (msg) msg.innerHTML = "Comment cannot be blank";
-    return;
-  }
-  if (!rating) {
-    if (msg) msg.innerHTML = "Rating cannot be blank";
-    return;
-  }*/
   fetch(api, {
     method: "POST",
     headers: {
@@ -194,15 +185,6 @@ function editForm() {
     if (editMsg) editMsg.innerHTML = "Movie title cannot be blank";
     return;
   }
-/*  if (!comment) {
-    // Changed validation message
-    if (editMsg) editMsg.innerHTML = "Comment cannot be blank";
-    return;
-  }
-  if (!rating) {
-    if (editMsg) editMsg.innerHTML = "Rating cannot be blank";
-    return;
-  }*/
   fetch(`${api}/${selectedMovie.id}`, {
     method: "PUT",
     headers: {
