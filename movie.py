@@ -1,4 +1,5 @@
 from typing import Annotated
+from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, Path, HTTPException, status
 from jwt_auth import TokenData
 from movie_model import Movie, MovieRequest
@@ -24,7 +25,7 @@ async def add_movie(r: MovieRequest) -> Movie:
        # review=movie.review,  # Added review field
     # watched=r.watched,
     # movie_list.append(new_movie)
-    newMovie.save()
+    await newMovie.save()
     return newMovie
 
 
@@ -52,26 +53,47 @@ async def get_movie_by_id(id: int = Path(..., title="default")) -> Movie:
 
 
 @movie_router.put("/{id}")
-async def update_movie(movie: MovieRequest, id: int) -> dict:
-    for x in movie_list:
-        if x.id == id:
-            x.title = movie.title
-            x.comment = movie.comment
-            x.rating = movie.rating
-            x.review = movie.review  # Added review field
-            x.watched = movie.watched
-            return {"message": "Movie updated successfully"}
-    return {"message": f"The movie with ID={id} is not found."}
+async def update_movie(movie: MovieRequest, id: PydanticObjectId) -> Movie:
+    # for x in movie_list:
+    #     if x.id == id:
+    #         x.title = movie.title
+    #         x.comment = movie.comment
+    #         x.rating = movie.rating
+    #         x.review = movie.review  # Added review field
+    #         x.watched = movie.watched
+    #         return {"message": "Movie updated successfully"}
+    # return {"message": f"The movie with ID={id} is not found."}
+    global max_stop_id
+    
+    existing_movie= await Movie.get(id)
+    if existing_movie:
+        existing_movie.title = movie.title
+        existing_movie.comment = movie.comment
+        await existing_movie.save()
+        return existing_movie
+    
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND, 
+        detail=f"Vacation with ID={id} is not found"
+    )
 
 
 @movie_router.delete("/{id}")
-async def delete_movie(id: int) -> dict:
-    for i in range(len(movie_list)):
-        movie = movie_list[i]
-        if movie.id == id:
-            movie_list.pop(i)
-            return {"message": f"The movie with ID={id} has been deleted."}
-    return {"message": f"The movie with ID={id} is not found."}
+async def delete_movie(id: PydanticObjectId) -> dict:
+    # for i in range(len(movie_list)):
+    #     movie = movie_list[i]
+    #     if movie.id == id:
+    #         movie_list.pop(i)
+    #         return {"message": f"The movie with ID={id} has been deleted."}
+    # return {"message": f"The movie with ID={id} is not found."}
+    movie = await Movie.get(id)
+    if movie:
+        await movie.delete()
+        return {"message": "movie deleted"}
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"The movie with ID={id} is not found.",
+    )
 
 
 @movie_router.put("/{id}/toggle-watched")

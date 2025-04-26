@@ -7,11 +7,10 @@ class MovieRequest(BaseModel):
     comment: str
 
 class Movie(Document):
-    id: int
     title: str
     comment: str
 
-    class settings:
+    class Settings:
         name = "movies"
 
 #class User(Document):
@@ -27,7 +26,7 @@ class Review(Document):
     rating: int
     review: str = ""  # Added review field with default empty string
 
-    class settings:
+    class Settings:
         name = "reviews"
 
 class ReviewRequest(BaseModel):
@@ -38,7 +37,7 @@ class Watchlist(Document):
     id: int
     watched: bool = False
 
-    class settings:
+    class Settings:
         name = "watchlist"
 
 

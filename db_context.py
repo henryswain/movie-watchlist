@@ -10,11 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 async def init_database():
-    print("init_database called")
     my_config = get_settings()
     client = AsyncIOMotorClient(my_config.connection_string)
-    print("connection String: ", my_config.connection_string)
-    print("secret key: ", my_config.secret_key)
     logger.info("database client created")
     db = client["MovieTracker"]
     await init_beanie(database=db, document_models=[User, Movie, Review, Watchlist])

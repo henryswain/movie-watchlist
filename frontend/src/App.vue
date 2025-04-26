@@ -37,7 +37,7 @@ function filterMovies(filter) {
 
 function tryEditMovie(id) {
   console.log("Editing movie:", id);
-  const movie = data.find((x) => x.id === id);
+  const movie = filteredData.value.find((x) => x._id === id);
   if (!movie) {
     console.error("Movie not found:", id);
     return;
@@ -109,12 +109,13 @@ function deleteMovie(id) {
     method: "DELETE",
   })
     .then((response) => {
-      if (response.ok) {
-        data = data.filter((x) => x.id !== id);
-        refreshMovies();
-      } else {
-        console.error("Error deleting movie");
-      }
+      // if (response.ok) {
+      //   data = data.filter((x) => x.id !== id);
+      //   refreshMovies();
+      // } else {
+      //   console.error("Error deleting movie");
+      // }
+      refreshMovies()
     })
     .catch((error) => {
       console.error("Error:", error);
@@ -145,12 +146,12 @@ function addMovieInfo() {
     body: JSON.stringify({
       title,
       comment,
-      rating: parseInt(rating),
-      review, // New: Include review in request body
-      watched,
     }),
   })
     .then((response) => {
+      // rating: parseInt(rating),
+      // review, // New: Include review in request body
+      // watched,
       console.log("Response status:", response.status);
       if (response.ok) {
         return response.json();
@@ -159,7 +160,9 @@ function addMovieInfo() {
     })
     .then((newMovie) => {
       console.log("Movie added successfully:", newMovie);
-      data.push(newMovie);
+      console.log("Getting movies from API");
+     
+      // data.push(newMovie);
       refreshMovies();
       resetForm();
 
@@ -185,7 +188,7 @@ function editForm() {
   const watched = editAlreadyWatchedInput.value;
   console.log(
     "Editing movie:",
-    selectedMovie.id,
+    selectedMovie._id,
     title,
     comment,
     rating,
@@ -199,20 +202,21 @@ function editForm() {
     return;
   }
   
-  fetch(`${api}/${selectedMovie.id}`, {
+  fetch(`${api}/${selectedMovie._id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       title,
-      comment,
-      rating: parseInt(rating),
-      review, // Include review in request body
-      watched,
+      comment
     }),
+
   })
     .then((response) => {
+    // rating: parseInt(rating),
+    // review, // Include review in request body
+    // watched,
       if (response.ok) {
         selectedMovie.title = title;
         selectedMovie.comment = comment;
@@ -236,9 +240,9 @@ function editForm() {
 }
 
 // helper functions
-// function refreshMovies() {
+function refreshMovies() {
 //   console.log("Refreshing movies with filter:", currentFilter);
-//   filteredData.value = [...data];
+  // filteredData.value = [...data];
 
 //   if (currentFilter.value === "watched") {
 //     filteredData.value = data.filter((movie) => movie.watched);
@@ -247,7 +251,25 @@ function editForm() {
 //   }
 //   console.log("Filtered data:", filteredData.value);
 //   filteredData.value.sort((a, b) => b.id - a.id);
-// }
+
+console.log("Getting movies from API");
+  fetch(api)
+    .then((response) => {
+      console.log("response: ", response)
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error(`Network response was not ok: ${response.statusText}`);
+    })
+    .then((movies) => {
+      console.log("Movies retrieved:", movies);
+      filteredData.value = movies;
+      console.log("data: ", data)
+    })
+    .catch((error) => {
+      console.error("Error getting movies:", error);
+    });
+}
 
 function resetForm() {
   titleInput.value = "";
@@ -377,46 +399,47 @@ onMounted(() => {
         </button>
       </div>
 
-      <!-- <div
+      <div
         v-for="movie in filteredData"
         :key="movie.id"
         :class="`movie-card ${movie.watched ? 'watched' : 'unwatched'}`"
       >
         <div class="movie-header">
-          <h4>{{ movie.title }} ({{ movie.rating }})</h4>
-          <span :class="`badge ${movie.watched ? 'bg-success' : 'bg-warning'}`">
+          <h4>{{ movie.title }} </h4>
+          <!-- ({{ movie.rating }}) -->
+          <!-- <span :class="`badge ${movie.watched ? 'bg-success' : 'bg-warning'}`">
             {{ movie.watched ? "Watched" : "To Watch" }}
-          </span>
+          </span> -->
         </div>
         <p class="text-secondary">Comment: {{ movie.comment }}</p>
         
         New: Rating review section showing why the user rated the movie as they did
-        <div v-if="movie.review" class="rating-review">
+        <!-- <div v-if="movie.review" class="rating-review">
           <h5>Why This Rating?</h5>
           <p>{{ movie.review }}</p>
-        </div>
+        </div> -->
         
-        <!-- Schedule viewing section with date picker and ICS download button
+        Schedule viewing section with date picker and ICS download button
         <div class="schedule-viewing">
-          <label :for="`watch-date-${movie.id}`" class="form-label">Select Viewing Date:</label>
-          <input type="date" :id="`watch-date-${movie.id}`" v-model="selectedDates[movie.id]" class="form-control mb-2" />
+          <label :for="`watch-date-${movie._id}`" class="form-label">Select Viewing Date:</label>
+          <input type="date" :id="`watch-date-${movie._id}`" v-model="selectedDates[movie._id]" class="form-control mb-2" />
           <img :src="icsDownloadImg" alt="Download Calendar" title="Download Calendar Event" @click="downloadICS(movie)" style="cursor: pointer; height: 40px;" />
           <span style="font-size: 0.9rem; margin-left: 10px;">Download Calendar Event</span>
         </div>
         <div class="options">
-          <i
-            @click="toggleWatched(movie.id)"
+          <!-- <i
+            @click="toggleWatched(movie._id)"
             :class="`fas ${movie.watched ? 'fa-eye-slash' : 'fa-eye'}`"
-          ></i>
+          ></i> -->
           <i
-            @click="tryEditMovie(movie.id)"
+            @click="tryEditMovie(movie._id)"
             class="fas fa-edit"
             data-bs-toggle="modal"
             data-bs-target="#editModal"
           ></i>
-          <i @click="deleteMovie(movie.id)" class="fas fa-trash-alt"></i>
+          <i @click="deleteMovie(movie._id)" class="fas fa-trash-alt"></i>
         </div>
-      </div> -->
+      </div>
     </div>
   </div>
 
