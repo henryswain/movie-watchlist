@@ -1,21 +1,18 @@
 
+from beanie import Document
 from pydantic import BaseModel
 
 class MovieRequest(BaseModel):
     title: str
     comment: str
-    rating: int
-    review: str = ""  # Added review field with default empty string
-    watched: bool = False
 
-
-class Movie(BaseModel):
+class Movie(Document):
     id: int
     title: str
     comment: str
-    rating: int
-    review: str = ""  # Added review field with default empty string
-    watched: bool = False
+
+    class settings:
+        name = "movies"
 
 #class User(Document):
   #  email: EmailStr
@@ -23,3 +20,27 @@ class Movie(BaseModel):
     
    # class Settings:
       #  name = "users"  # This will store users in the "users" collection
+
+
+class Review(Document):
+    id: int
+    rating: int
+    review: str = ""  # Added review field with default empty string
+
+    class settings:
+        name = "reviews"
+
+class ReviewRequest(BaseModel):
+    rating: int
+    review: str = ""
+
+class Watchlist(Document):
+    id: int
+    watched: bool = False
+
+    class settings:
+        name = "watchlist"
+
+
+class WatchlistRequest(BaseModel):
+    watched: bool
