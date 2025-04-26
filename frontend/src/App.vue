@@ -224,18 +224,18 @@ function editForm() {
 }
 
 // helper functions
-function refreshMovies() {
-  console.log("Refreshing movies with filter:", currentFilter);
-  filteredData.value = [...data];
+// function refreshMovies() {
+//   console.log("Refreshing movies with filter:", currentFilter);
+//   filteredData.value = [...data];
 
-  if (currentFilter.value === "watched") {
-    filteredData.value = data.filter((movie) => movie.watched);
-  } else if (currentFilter.value === "unwatched") {
-    filteredData.value = data.filter((movie) => !movie.watched);
-  }
-  console.log("Filtered data:", filteredData.value);
-  filteredData.value.sort((a, b) => b.id - a.id);
-}
+//   if (currentFilter.value === "watched") {
+//     filteredData.value = data.filter((movie) => movie.watched);
+//   } else if (currentFilter.value === "unwatched") {
+//     filteredData.value = data.filter((movie) => !movie.watched);
+//   }
+//   console.log("Filtered data:", filteredData.value);
+//   filteredData.value.sort((a, b) => b.id - a.id);
+// }
 
 function resetForm() {
   titleInput.value = "";
@@ -316,7 +316,8 @@ onMounted(() => {
     })
     .then((movies) => {
       console.log("Movies retrieved:", movies);
-      data = movies || [];
+      data = movies;
+      console.log("data: ", data)
       refreshMovies();
     })
     .catch((error) => {
@@ -362,7 +363,7 @@ onMounted(() => {
         </button>
       </div>
 
-      <div
+      <!-- <div
         v-for="movie in filteredData"
         :key="movie.id"
         :class="`movie-card ${movie.watched ? 'watched' : 'unwatched'}`"
@@ -374,7 +375,7 @@ onMounted(() => {
           </span>
         </div>
         <p class="text-secondary">Comment: {{ movie.comment }}</p>
-        <!-- New: Schedule viewing section with date picker and ICS download button -->
+        New: Schedule viewing section with date picker and ICS download button
         <div class="schedule-viewing">
           <label :for="`watch-date-${movie.id}`" class="form-label">Select Viewing Date:</label>
           <input type="date" :id="`watch-date-${movie.id}`" v-model="selectedDates[movie.id]" class="form-control mb-2" />
@@ -394,7 +395,7 @@ onMounted(() => {
           ></i>
           <i @click="deleteMovie(movie.id)" class="fas fa-trash-alt"></i>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 

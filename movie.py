@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Path, HTTPException, status
+from typing import Annotated
+from fastapi import APIRouter, Depends, Path, HTTPException, status
+from jwt_auth import TokenData
 from model import Movie, MovieRequest
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -10,25 +12,30 @@ max_id: int = 0
 
 
 @movie_router.post("", status_code=status.HTTP_201_CREATED)
-async def add_movie(movie: MovieRequest) -> Movie:
-    print("add movie called: ", movie)
-    global max_id
-    max_id += 1  # auto increment ID
-    new_movie = Movie(
-        id=max_id,
-        title=movie.title,
-        comment=movie.comment,
-        rating=movie.rating,
-        watched=movie.watched,
+async def add_movie(r: MovieRequest) -> Movie:
+    print("add movie called: ", r)
+    # global max_id
+    # max_id += 1  # auto increment ID
+    newMovie = Movie(
+        title=r.title,
+        comment=r.comment,
     )
-    movie_list.append(new_movie)
-    return new_movie
+    # rating=r.rating,
+    # watched=r.watched,
+    # movie_list.append(new_movie)
+    newMovie.save()
+    return newMovie
 
 
 @movie_router.get("")
 async def get_movies() -> list[Movie]:
-    print("get movies called")
-    return movie_list
+    # if not user or not user.username:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail=f"Please login.",
+    #     )
+    # return await Movie.find(Movie.created_by == user.username).to_list()
+    return await Movie.find_all().to_list()
 
 
 @movie_router.get("/{id}")
