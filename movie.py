@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Path, HTTPException, status
-from model import Movie, MovieRequest
+from movie_model import Movie, MovieRequest
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
