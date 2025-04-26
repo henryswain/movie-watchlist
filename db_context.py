@@ -3,8 +3,8 @@ from beanie import init_beanie
 from my_config import get_settings
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from model import Movie
-from user import User
+from movie_model import Movie
+from user_model import User
 
 logger = logging.getLogger(__name__)
 
