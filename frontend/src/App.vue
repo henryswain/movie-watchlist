@@ -7,8 +7,8 @@ const filteredData = ref([]);
 let data = [];
 let selectedMovie = {};
 const currentFilter = ref("all");
-// const api = 'http://127.0.0.1:8000/movies';
-const api = "/api/movies";
+const api = 'http://127.0.0.1:8000/movies';
+// const api = "api/movies";
 
 const titleInput = ref("");
 const commentInput = ref(""); // Changed from directorInput
@@ -390,7 +390,7 @@ onMounted(() => {
         </div>
         <p class="text-secondary">Comment: {{ movie.comment }}</p>
         
-        New: Rating review section showing why the user rated the movie as they did -->
+        New: Rating review section showing why the user rated the movie as they did
         <div v-if="movie.review" class="rating-review">
           <h5>Why This Rating?</h5>
           <p>{{ movie.review }}</p>

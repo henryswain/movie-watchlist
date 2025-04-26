@@ -30,6 +30,7 @@ async def add_movie(r: MovieRequest) -> Movie:
 
 @movie_router.get("")
 async def get_movies() -> list[Movie]:
+    print("get_movies called")
     # if not user or not user.username:
     #     raise HTTPException(
     #         status_code=status.HTTP_401_UNAUTHORIZED,

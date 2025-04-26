@@ -1,14 +1,23 @@
+from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
+from db_context import init_database
 from movie import movie_router
 from user import user_router
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # on startup event
+    print("Application starts...")
+    await init_database()
+    yield
+    # on shutdown event
+    print("Application shuts down...")
 
-
+app = FastAPI(title="Vacation App", version="2.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
