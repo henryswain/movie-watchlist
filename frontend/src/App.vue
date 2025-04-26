@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref } from "vue";
+import icsDownloadImg from "@/assets/icsdownload.png"; // New: Import the image for the download button
 
 const filteredData = ref([]);
 // Global variables
@@ -22,6 +23,9 @@ const editAlreadyWatchedInput = ref();
 // Star Rating Hovering state
 const hoverRating = ref(0);
 const editHoverRating = ref(0);
+
+// Reactive object to store viewing dates for each movie (keyed by movie.id)
+const selectedDates = ref({});
 
 function filterMovies(filter) {
   console.log("Filtering movies:", filter);
@@ -245,6 +249,62 @@ function resetForm() {
   editAlreadyWatchedInput.value = "";
 }
 
+// Function to generate and download an ICS file for the movie viewing event
+function downloadICS(movie) {
+  // Retrieve the selected viewing date for this movie from the reactive selectedDates object
+  const date = selectedDates.value[movie.id];
+  if (!date) {
+    // Alert the user if no date has been selected and exit the function
+    alert("Please select a viewing date first!");
+    return;
+  }
+  
+  // Convert the selected date (format: YYYY-MM-DD) to ICS date format (YYYYMMDD)
+  // Append a default start time (20:00 UTC) for the event
+  const dtstart = date.replace(/-/g, "") + "T200000Z"; // Start at 20:00 UTC
+  
+  // Append a default end time (22:00 UTC) for the event
+  const dtend = date.replace(/-/g, "") + "T220000Z";   // End at 22:00 UTC
+
+  // Construct the ICS file content using the standard ICS format.
+  // This includes the calendar metadata and event details like UID, timestamps, and event summary.
+  const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FilmTrack//EN
+BEGIN:VEVENT
+UID:${movie.id}@filmtrack.com
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split('.')[0]}Z
+DTSTART:${dtstart}
+DTEND:${dtend}
+SUMMARY:Watch ${movie.title}
+DESCRIPTION:Reminder to watch ${movie.title}. Rating: ${movie.rating}. Comment: ${movie.comment}
+END:VEVENT
+END:VCALENDAR`;
+
+  // Create a Blob object from the ICS content with the MIME type for calendar events
+  const blob = new Blob([icsContent], { type: "text/calendar" });
+  
+  // Generate a temporary URL for the Blob
+  const url = URL.createObjectURL(blob);
+  
+  // Create a temporary anchor element (<a>) and set its href attribute to the Blob URL
+  const link = document.createElement("a");
+  link.href = url;
+  
+  // Set the download attribute with a file name derived from the movie title
+  link.download = `${movie.title.replace(/\s+/g, "_")}_reminder.ics`;
+  
+  // Append the anchor element to the document body to make it part of the DOM
+  document.body.appendChild(link);
+  
+  // Programmatically click the link to trigger the download of the ICS file
+  link.click();
+  
+  // Remove the temporary anchor element from the DOM after the download has started
+  document.body.removeChild(link);
+}
+
+
 onMounted(() => {
   console.log("Getting movies from API");
   fetch(api)
@@ -266,10 +326,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="container d-flex justify-content-center align-items-center"
-    style="height: 100vh"
-  >
+  <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
     <div class="app">
       <h2 class="text-center mb-4">FilmTrack</h2>
 
@@ -307,26 +364,23 @@ onMounted(() => {
 
       <div
         v-for="movie in filteredData"
+        :key="movie.id"
         :class="`movie-card ${movie.watched ? 'watched' : 'unwatched'}`"
       >
         <div class="movie-header">
           <h4>{{ movie.title }} ({{ movie.rating }})</h4>
-          <span
-            :class="`badge ${movie.watched ? 'bg-success' : 'bg-warning'}`"
-            >{{ movie.watched ? "Watched" : "To Watch" }}</span
-          >
-        </div>
-        <div class="star-display">
-          <span
-            v-for="i in 5"
-            :key="i"
-            class="star"
-            :class="{ filled: i <= movie.rating }"
-            >★</span
-          >
+          <span :class="`badge ${movie.watched ? 'bg-success' : 'bg-warning'}`">
+            {{ movie.watched ? "Watched" : "To Watch" }}
+          </span>
         </div>
         <p class="text-secondary">Comment: {{ movie.comment }}</p>
-        <!-- Changed from Director -->
+        <!-- New: Schedule viewing section with date picker and ICS download button -->
+        <div class="schedule-viewing">
+          <label :for="`watch-date-${movie.id}`" class="form-label">Select Viewing Date:</label>
+          <input type="date" :id="`watch-date-${movie.id}`" v-model="selectedDates[movie.id]" class="form-control mb-2" />
+          <img :src="icsDownloadImg" alt="Download Calendar" title="Download Calendar Event" @click="downloadICS(movie)" style="cursor: pointer; height: 40px;" />
+          <span style="font-size: 0.9rem; margin-left: 10px;">Download Calendar Event</span>
+        </div>
         <div class="options">
           <i
             @click="toggleWatched(movie.id)"
@@ -366,31 +420,17 @@ onMounted(() => {
         <div class="modal-body">
           <form id="form-add">
             <div class="mb-3">
-              <label for="title" class="form-label"
-                >Movie Title <i>(required)</i></label
-              >
-              <input
-                type="text"
-                class="form-control"
-                id="title"
-                v-model="titleInput"
-              />
+              <label for="title" class="form-label">Movie Title <i>(required)</i></label>
+              <input type="text" class="form-control" id="title" v-model="titleInput" />
             </div>
             <div class="mb-3">
               <label for="comment" class="form-label">Comment</label>
               <!-- Changed from Director -->
-              <input
-                type="text"
-                class="form-control"
-                id="comment"
-                v-model="commentInput"
-              />
+              <input type="text" class="form-control" id="comment" v-model="commentInput" />
               <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
-              <label for="rating" class="form-label"
-                >Rating <i>(1 to 5 stars)</i></label
-              >
+              <label for="rating" class="form-label">Rating <i>(1 to 5 stars)</i></label>
               <!-- Star Rating Component (add modal) -->
               <div class="star-rating">
                 <span
@@ -406,24 +446,11 @@ onMounted(() => {
               </div>
             </div>
             <div class="mb-3 form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="watched"
-                v-model="alreadyWatchedInput"
-              />
-              <label class="form-check-label" for="watched"
-                >Already Watched</label
-              >
+              <input type="checkbox" class="form-check-input" id="watched" v-model="alreadyWatchedInput" />
+              <label class="form-check-label" for="watched">Already Watched</label>
             </div>
             <div id="msg" class="mb-3"></div>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="addMovieInfo()"
-            >
-              Add Movie
-            </button>
+            <button type="button" class="btn btn-primary" @click="addMovieInfo()">Add Movie</button>
           </form>
         </div>
       </div>
@@ -454,31 +481,17 @@ onMounted(() => {
         <div class="modal-body">
           <form id="form-edit">
             <div class="mb-3">
-              <label for="title-edit" class="form-label"
-                >Movie Title <i>(required)</i></label
-              >
-              <input
-                type="text"
-                class="form-control"
-                id="title-edit"
-                v-model="editTitleInput"
-              />
+              <label for="title-edit" class="form-label">Movie Title <i>(required)</i></label>
+              <input type="text" class="form-control" id="title-edit" v-model="editTitleInput" />
             </div>
             <div class="mb-3">
               <label for="comment-edit" class="form-label">Comment</label>
               <!-- Changed from Director -->
-              <input
-                type="text"
-                class="form-control"
-                id="comment-edit"
-                v-model="editCommentInput"
-              />
+              <input type="text" class="form-control" id="comment-edit" v-model="editCommentInput" />
               <!-- Changed IDs and bindings -->
             </div>
             <div class="mb-3">
-              <label for="rating-edit" class="form-label"
-                >Rating <i>(1 to 5 stars)</i></label
-              >
+              <label for="rating-edit" class="form-label">Rating <i>(1 to 5 stars)</i></label>
               <!-- Star Rating Component (edit modal)-->
               <div class="star-rating">
                 <span
@@ -492,22 +505,14 @@ onMounted(() => {
                   >★</span
                 >
               </div>
+              <input type="number" class="form-control" id="rating-edit" v-model="editRatingInput" />
             </div>
             <div class="mb-3 form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                id="watched-edit"
-                v-model="editAlreadyWatchedInput"
-              />
-              <label class="form-check-label" for="watched-edit"
-                >Already Watched</label
-              >
+              <input type="checkbox" class="form-check-input" id="watched-edit" v-model="editAlreadyWatchedInput" />
+              <label class="form-check-label" for="watched-edit">Already Watched</label>
             </div>
             <div id="edit-msg" class="mb-3"></div>
-            <button type="button" class="btn btn-primary" @click="editForm()">
-              Update Movie
-            </button>
+            <button type="button" class="btn btn-primary" @click="editForm()">Update Movie</button>
           </form>
         </div>
       </div>
@@ -731,7 +736,7 @@ body {
 
 .star {
   cursor: pointer;
-  font-size: 25px;
+  font-size: 30px;
   color: #cfcfcf;
   transition: color 0.2s;
   margin-right: 5px;
@@ -745,12 +750,10 @@ body {
   margin: 5px 0;
 }
 
-.star-dsplay .star {
-  color: #cfcfcf;
-  margin-right: 3px;
-}
-
-.star-display .star-filled {
-  color: #ffd700;
+/* Style for the schedule viewing section */
+.schedule-viewing {
+  margin-top: 10px;
+  padding: 10px;
+  border-top: 1px solid #ccc;
 }
 </style>
