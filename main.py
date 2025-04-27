@@ -7,6 +7,7 @@ from starlette.responses import FileResponse
 from db_context import init_database
 from movie import movie_router
 from user import user_router
+from db_context import init_database
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
