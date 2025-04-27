@@ -38,6 +38,7 @@ user_router = APIRouter()
 
 @user_router.post("/signup")
 async def sign_up(user: UserRequest):
+    print("user: ", user)
     existing_user = await User.find_one(User.username == user.username)
 
     if existing_user:

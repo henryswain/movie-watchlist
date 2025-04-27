@@ -11,7 +11,14 @@ logger = logging.getLogger(__name__)
 
 async def init_database():
     my_config = get_settings()
-    client = AsyncIOMotorClient(my_config.connection_string)
+    # Add tlsAllowInvalidCertificates=true to the connection string
+    connection_string = my_config.connection_string
+    if "?" in connection_string:
+        connection_string += "&tlsAllowInvalidCertificates=true"
+    else:
+        connection_string += "?tlsAllowInvalidCertificates=true"
+
+    client = AsyncIOMotorClient(connection_string)
     logger.info("database client created")
     db = client["MovieTracker"]
     await init_beanie(database=db, document_models=[User, Movie, Review, Watchlist])
