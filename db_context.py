@@ -8,7 +8,6 @@ from user_model import User
 
 logger = logging.getLogger(__name__)
 
-
 async def init_database():
     my_config = get_settings()
     # Add tlsAllowInvalidCertificates=true to the connection string

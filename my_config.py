@@ -5,8 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class MyConfig(BaseSettings):
     connection_string: str
     secret_key: str
+    db_name: str = "MovieTracker"
 
-    model_config = SettingsConfigDict(env_file="./.env")
+    model_config = SettingsConfigDict(env_file=".env")
 
 
 

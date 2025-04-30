@@ -24,7 +24,8 @@ class HashPassword:
         return pwd_context.verify(input_password, hashed_password)
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/sign-in")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/sign-in")
+
 hash_password = HashPassword()
 
 
