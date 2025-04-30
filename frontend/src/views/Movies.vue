@@ -1,9 +1,14 @@
 <template>
   <div class="main-content">
-    <div
-      class="container d-flex justify-content-center align-items-center"
-      style="height: 100vh"
-    >
+    <div class="notification-banner">
+      <p class="notification text">
+        <i class="fas fa-info-circle">
+          If you believe any movie contains inappropriate content, please email
+          the admin to report it.
+        </i>
+      </p>
+    </div>
+    <div class="container d-flex justify-content-center align-items-center">
       <div class="app">
         <h2 class="text-center mb-4">FilmTrack</h2>
 
@@ -101,7 +106,17 @@
               class="fas fa-edit disabled"
               title="You can only edit movies you added"
             ></i>
-            <i @click="deleteMovie(movie.id)" class="fas fa-trash-alt"></i>
+            <i
+              v-if="movie.added_by === getUsernameFromToken()"
+              @click="deleteMovie(movie.id)"
+              class="fas fa-trash-alt"
+              title="Delete movie"
+            ></i>
+            <i
+              v-else
+              class="fas fa-trash-alt disabled"
+              title="You can only delete movies you added"
+            ></i>
           </div>
         </div>
       </div>
@@ -757,9 +772,9 @@ body {
 
 .main-content {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
 }
 
 .app {
@@ -911,6 +926,28 @@ body {
 .fas.disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.notification-banner {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 10px 0;
+  width: 100%;
+  position: sticky;
+  top: 70% px;
+  z-index: 100;
+}
+
+.notification-text {
+  margin: 0;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.notification-text i {
+  margin-right: 5px;
+  color: #5271ff;
 }
 
 @media (max-width: 768px) {
