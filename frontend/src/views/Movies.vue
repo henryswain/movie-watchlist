@@ -28,6 +28,10 @@
           >
             To Watch
           </button>
+          <!-- New My Movies button -->
+          <button @click="filterMovies('my')" class="btn btn-outline-secondary">
+            My Movies
+          </button>
         </div>
 
         <div>
@@ -376,6 +380,7 @@ onBeforeMount(() => {
 });
 
 const filteredData = ref([]);
+let allMoviesData = [];
 let selectedMovie = {};
 const currentFilter = ref("all");
 const api = "http://127.0.0.1:8000/movies";
@@ -402,7 +407,22 @@ const selectedDates = ref({});
 
 function filterMovies(filter) {
   currentFilter.value = filter;
-  refreshMovies();
+
+  if (filter === "all") {
+    filteredData.value = allMoviesData;
+  } else if (filter === "watched") {
+    filteredData.value = allMoviesData.filter((movie) => movie.watched);
+  } else if (filter === "unwatched") {
+    filteredData.value = allMoviesData.filter((movie) => !movie.watched);
+  } else if (filter === "my") {
+    // Filter movies added by the current user
+    const username = getUsernameFromToken();
+    filteredData.value = allMoviesData.filter(
+      (movie) => movie.added_by === username
+    );
+  }
+
+  //refreshMovies();
 }
 
 function tryEditMovie(id) {
@@ -674,13 +694,10 @@ function refreshMovies() {
       if (!movies) return;
 
       console.log("Movies received:", movies);
-      filteredData.value = movies;
+      allMoviesData = movies; // Store all movies
 
-      if (currentFilter.value === "watched") {
-        filteredData.value = movies.filter((movie) => movie.watched);
-      } else if (currentFilter.value === "unwatched") {
-        filteredData.value = movies.filter((movie) => !movie.watched);
-      }
+      // Apply the current filter
+      filterMovies(currentFilter.value);
     })
     .catch((error) => {
       console.error("Error getting movies:", error);
@@ -810,6 +827,14 @@ body {
 
 .filter-buttons {
   margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.filter-buttons button {
+  flex: 1;
+  min-width: 100px;
 }
 
 .movie-card {
@@ -954,6 +979,16 @@ body {
   .app {
     width: 95%;
     margin: 0 auto;
+  }
+
+  .filter-button {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .filter-buttons buttons {
+    flex: 1 0 45%;
+    margin-bottom: 5px;
   }
 }
 </style>
