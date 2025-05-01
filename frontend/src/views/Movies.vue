@@ -8,6 +8,12 @@
         </i>
       </p>
     </div>
+
+    <!-- Admin badge for admin users -->
+    <div v-if="isAdmin" class="admin-badge">
+      <i class="fas fa-shield-alt"></i> Administrator Mode
+    </div>
+
     <div class="container d-flex justify-content-center align-items-center">
       <div class="app">
         <h2 class="text-center mb-4">FilmTrack</h2>
@@ -64,6 +70,19 @@
               </div>
             </div>
           </div>
+
+          <!-- "Added by" information -->
+          <div class="movie-metadata">
+            <p class="added-by">
+              <i class="fas fa-user"></i> Added by:
+              <span class="user">{{ movie.added_by }}</span>
+            </p>
+            <p clas="added-date">
+              <i class="fas fa-calendar-alt"></i> Added on:
+              <span class="date">{{ formatDate(movie.date_added) }}</span>
+            </p>
+          </div>
+
           <p class="text-secondary">Comment: {{ movie.comment }}</p>
 
           <div
@@ -98,12 +117,16 @@
           </div>
           <div class="options">
             <i
-              v-if="movie.added_by === getUsernameFromToken()"
+              v-if="isAdmin || movie.added_by === getUsernameFromToken()"
               @click="tryEditMovie(movie.id)"
               class="fas fa-edit"
               data-bs-toggle="modal"
               data-bs-target="#editModal"
-              title="Edit movie"
+              :title="isAdmin ? 'Edit movie (admin)' : 'Edit movie'"
+              :class="{
+                'admin-action':
+                  isAdmin && movie.added_by !== getUsernameFromToken(),
+              }"
             ></i>
             <i
               v-else
@@ -111,10 +134,14 @@
               title="You can only edit movies you added"
             ></i>
             <i
-              v-if="movie.added_by === getUsernameFromToken()"
+              v-if="isAdmin || movie.added_by === getUsernameFromToken()"
               @click="deleteMovie(movie.id)"
               class="fas fa-trash-alt"
-              title="Delete movie"
+              :title="isAdmin ? 'Delete movie (admin)' : 'Delete movie'"
+              :class="{
+                'admin-action':
+                  isAdmin && movie.added_by !== getUsernameFromToken(),
+              }"
             ></i>
             <i
               v-else
@@ -245,7 +272,12 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="editModalLabel">Edit Movie</h5>
+            <h5 class="modal-title" id="editModalLabel">
+              Edit Movie
+              <span v-if="isEditingAsAdmin" class="admin-edit-badge"
+                >Admin Edit</span
+              >
+            </h5>
             <button
               type="button"
               class="btn-close"
@@ -405,6 +437,43 @@ const editHoverRating = ref(0);
 // Reactive object to store viewing dates for each movie
 const selectedDates = ref({});
 
+// Admin state - track if current user is an admin
+const isAdmin = ref(false);
+const isEditingAsAdmin = ref(false);
+
+// Check if user has admin role from JWT token
+function checkAdminRole() {
+  const token = localStorage.getItem("access_token");
+  if (!token) return false;
+
+  try {
+    const payload = token.split(".")[1];
+    const decodedPayload = atob(payload);
+    const payloadData = JSON.parse(decodedPayload);
+
+    // Return true if role is Admin
+    return payloadData.role === "AdminUser";
+  } catch (e) {
+    onslotchange.error("Error checking admin role:", e);
+    return false;
+  }
+}
+
+// Function to format date - added for displaying date_added
+function formatDate(dateString) {
+  if (!dateString) return "Unknown";
+
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  }).format(date);
+}
+
 function filterMovies(filter) {
   currentFilter.value = filter;
 
@@ -433,10 +502,13 @@ function tryEditMovie(id) {
   }
 
   // Check if user has permission to edit (safegaurd)
-  if (movie.added_by !== getUsernameFromToken()) {
+  const username = getUserFromToken();
+  if (!isAdmin.value && movie.added_by !== username) {
     showUpdateErrorModal("You can only edit movies that you added");
     return;
   }
+
+  isEditingAsAdmin.value = isAdmin.value && movie.added_by !== username;
 
   selectedMovie = movie;
 
@@ -478,6 +550,18 @@ function clearEditHoverRating() {
 }
 
 function deleteMovie(id) {
+  // Ask for confirmation, espeically for admin actions
+  const movie = filteredData.value.find((m) => m.id === id);
+  if (!movie) return;
+
+  const username = getUsernameFromToken();
+  const isAdminDeleting = isAdmin.value && movie.added_by !== username;
+
+  let confirmMessage = "Are you sure you want to delete this movie?";
+  if (isAdminDeleting) {
+    confirmMessage = `ADMIN ACTION: Are you sure you wat to delete "${movie.title}" added by ${movie.added_by}?`;
+  }
+
   fetch(`${api}/${id}`, {
     method: "DELETE",
     headers: {
@@ -515,7 +599,7 @@ function showDeleteErrorModal(errorMessage) {
   const modalMessage = `
     ${errorMessage}. 
     If you believe this movie contains inappropriate content, 
-    please email admin@filmtrack.com to report it.
+    please email admin to report it.
   `;
 
   alert(modalMessage);
@@ -585,7 +669,8 @@ function editForm() {
   }
 
   // Check if the current user is the one who added the movie
-  if (selectedMovie.added_by !== getUsernameFromToken()) {
+  const username = getUsernameFromToken();
+  if (!isAdmin.value && selectedMovie.added_by !== username) {
     if (editMsg) editMsg.innerHTML = "You can only edit movies that you added";
     return;
   }
@@ -659,7 +744,7 @@ function showUpdateErrorModal(errorMessage) {
   const modalMessage = `
     ${errorMessage}. 
     If you believe this movie contains inappropriate content, 
-    please email admin@filmtrack.com to report it.
+    please email admin to report it.
   `;
 
   alert(modalMessage);
@@ -695,6 +780,16 @@ function refreshMovies() {
 
       console.log("Movies received:", movies);
       allMoviesData = movies; // Store all movies
+
+      // Check if the user is an admin
+      if (movies.length > 0 && movies[0].hasOwnProperty("is_admin")) {
+        isAdmin.value = movies[0].is_admin;
+      } else {
+        // Fallback to checking the JWT token
+        isAdmin.value = checkAdminRole();
+      }
+
+      console.log("User is admin: ", isAdmin.value);
 
       // Apply the current filter
       filterMovies(currentFilter.value);
@@ -764,6 +859,9 @@ END:VCALENDAR`;
 
 // Make sure token is refreshed at mount time
 onMounted(() => {
+  // Initial check for admin status
+  isAdmin.value = checkAdminRole();
+
   token.value = localStorage.getItem("access_token");
 
   if (!token.value) {
@@ -973,6 +1071,72 @@ body {
 .notification-text i {
   margin-right: 5px;
   color: #5271ff;
+}
+
+.movie-metadata {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.movie-metadata p {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+}
+
+.movie-metadata i {
+  margin-right: 8px;
+  width: 16px;
+  color: #5271ff;
+}
+
+.movie-metadata .user {
+  font-weight: bold;
+  color: #5271ff;
+}
+
+.movie-metadata .date {
+  font-weight: bold;
+}
+
+.admin-badge {
+  background-color: #dc3545;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px auto;
+  max-width: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-shadow: 0 2pz 4px rgba(0, 0, 0, 0.2);
+}
+
+.admin-badge i {
+  font-size: 1.2rem;
+}
+
+.admin-action {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545 !important;
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.admin-edit-badge {
+  font-size: 0.7rem;
+  background-color: #dc3545;
+  color: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-left: 5px;
+  vertical-align: middle;
 }
 
 @media (max-width: 768px) {

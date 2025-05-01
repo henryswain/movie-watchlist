@@ -62,6 +62,7 @@ class MovieResponse(BaseModel):
     avg_rating: Optional[float] = None
     user_review: Optional[dict] = None
     watchlist_status: Optional[dict] = None
+    is_admin: bool = False
 
 # New: Response models for reviews and watchlist
 class ReviewResponse(BaseModel):
