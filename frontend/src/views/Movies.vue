@@ -368,7 +368,8 @@
                   >Already Watched</label
                 >
               </div>
-
+              
+              <!-- Form Data Debugging
               <div
                 v-if="selectedMovie && selectedMovie.id"
                 class="debug-info small text-muted mb-3"
@@ -380,7 +381,7 @@
                   <li>Rating: {{ editRatingInput }}</li>
                   <li>Watched: {{ editAlreadyWatchedInput ? "Yes" : "No" }}</li>
                 </ul>
-              </div>
+              </div> -->
 
               <div id="edit-msg" class="mb-3"></div>
               <button type="submit" class="btn btn-primary">
@@ -516,7 +517,7 @@ function tryEditMovie(id) {
   }
 
   // Check if user has permission to edit (safegaurd)
-  const username = getUserFromToken();
+  const username = getUsernameFromToken();
   if (!isAdmin.value && movie.added_by !== username) {
     showUpdateErrorModal("You can only edit movies that you added");
     return;
@@ -528,8 +529,23 @@ function tryEditMovie(id) {
 
   editTitleInput.value = movie.title;
   editCommentInput.value = movie.comment;
-  editRatingInput.value = movie.user_review?.rating || 0;
-  editReviewInput.value = movie.user_review?.review || movie.review || "";
+
+  // Handle rating - Check if it exists in user_review first
+  if (movie.user_review && typeof movie.user_review.rating !== "undefined") {
+    editRatingInput.value = movie.user_review?.rating || 0;
+  } else {
+    editRatingInput.value = 0;
+  }
+
+  // Handle review text - check user_review first, then fall back to movie.review
+  if (movie.user_review && movie.user_review.review) {
+    editReviewInput.value = movie.user_review?.review || movie.review || "";
+  } else if (movie.review) {
+    editReviewInput.value = movie.review;
+  } else {
+    editReviewInput.value = "";
+  }
+  
   editAlreadyWatchedInput.value = movie.watched;
 
   const editMsg = document.getElementById("edit-msg");
@@ -879,7 +895,7 @@ onMounted(() => {
     router.push("/login");
     return;
   }
-  
+
   // Initial check for admin status
   isAdmin.value = checkAdminRole();
   refreshMovies();
