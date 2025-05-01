@@ -368,6 +368,20 @@
                   >Already Watched</label
                 >
               </div>
+
+              <div
+                v-if="selectedMovie && selectedMovie.id"
+                class="debug-info small text-muted mb-3"
+              >
+                <p class="mb-1">Form Data Debug:</p>
+                <ul class="mb-0 ps-3">
+                  <li>Title: {{ editTitleInput }}</li>
+                  <li>Comment: {{ editCommentInput }}</li>
+                  <li>Rating: {{ editRatingInput }}</li>
+                  <li>Watched: {{ editAlreadyWatchedInput ? "Yes" : "No" }}</li>
+                </ul>
+              </div>
+
               <div id="edit-msg" class="mb-3"></div>
               <button type="submit" class="btn btn-primary">
                 Update Movie
@@ -859,16 +873,15 @@ END:VCALENDAR`;
 
 // Make sure token is refreshed at mount time
 onMounted(() => {
-  // Initial check for admin status
-  isAdmin.value = checkAdminRole();
-
   token.value = localStorage.getItem("access_token");
 
   if (!token.value) {
     router.push("/login");
     return;
   }
-
+  
+  // Initial check for admin status
+  isAdmin.value = checkAdminRole();
   refreshMovies();
 });
 </script>
