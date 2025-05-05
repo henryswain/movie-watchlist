@@ -29,7 +29,7 @@
             Watched
           </button>
           <button
-            @click="filterMovies('unwatched')"
+            @click="filterMovies('not_watched')"
             class="btn btn-outline-warning"
           >
             To Watch
@@ -491,65 +491,52 @@ function formatDate(dateString) {
 
 function filterMovies(filter) {
   currentFilter.value = filter;
+  const filter2 = currentFilter.value
+  refreshMovies(filter2)
 
-  if (filter === "all") {
-    filteredData.value = allMoviesData;
-  } else if (filter === "watched") {
-    filteredData.value = allMoviesData.filter((movie) => movie.watched);
-  } else if (filter === "unwatched") {
-    filteredData.value = allMoviesData.filter((movie) => !movie.watched);
-  } else if (filter === "my") {
-    // Filter movies added by the current user
-    const username = getUsernameFromToken();
-    filteredData.value = allMoviesData.filter(
-      (movie) => movie.added_by === username
-    );
-  }
-
-  //refreshMovies();
 }
 
-function tryEditMovie(id) {
-  const movie = filteredData.value.find((x) => x.id === id);
-  if (!movie) {
-    console.error("Movie not found:", id);
-    return;
-  }
 
-  // Check if user has permission to edit (safegaurd)
-  const username = getUsernameFromToken();
-  if (!isAdmin.value && movie.added_by !== username) {
-    showUpdateErrorModal("You can only edit movies that you added");
-    return;
-  }
-
-  isEditingAsAdmin.value = isAdmin.value && movie.added_by !== username;
-
-  selectedMovie = movie;
-
-  editTitleInput.value = movie.title;
-  editCommentInput.value = movie.comment;
-
-  // Handle rating - Check if it exists in user_review first
-  if (movie.user_review && typeof movie.user_review.rating !== "undefined") {
-    editRatingInput.value = movie.user_review?.rating || 0;
-  } else {
-    editRatingInput.value = 0;
-  }
-
-  // Handle review text - check user_review first, then fall back to movie.review
-  if (movie.user_review && movie.user_review.review) {
-    editReviewInput.value = movie.user_review?.review || movie.review || "";
-  } else if (movie.review) {
-    editReviewInput.value = movie.review;
-  } else {
-    editReviewInput.value = "";
-  }
+async function tryEditMovie(id) {
+  console.log("id: ", id);
   
-  editAlreadyWatchedInput.value = movie.watched;
-
-  const editMsg = document.getElementById("edit-msg");
-  if (editMsg) editMsg.innerHTML = "";
+    // Fetch the movie data
+    const response = await fetch(`${api}/get/${id}`, {
+      method: "GET",
+      headers: {
+        ...authHeaders.value,
+      }
+    });
+    
+    // Check HTTP response first
+    if (!response.ok) {
+      console.error("Error fetching movie:", response.status);
+      showUpdateErrorModal(`Failed to fetch movie: ${response.statusText}`);
+      return;
+    }
+    
+    const movie = await response.json();
+    console.log("movie data: ", movie);
+    
+    isEditingAsAdmin.value = isAdmin.value && movie.added_by !== username;
+    
+    selectedMovie = movie;
+    
+    // Populate form fields
+    editTitleInput.value = movie.title;
+    editCommentInput.value = movie.comment || "";
+    
+    // Handle rating
+    editRatingInput.value = movie.rating || 0;
+    
+    // Handle review text
+    editReviewInput.value = movie.review || "";
+    
+    // Handle watched status
+    editAlreadyWatchedInput.value = movie.watched_status === "watched";
+    
+    const editMsg = document.getElementById("edit-msg");
+    if (editMsg) editMsg.innerHTML = "";
 }
 
 // Star Rating Functions
@@ -640,7 +627,7 @@ function addMovieInfo() {
   const comment = commentInput.value;
   const rating = ratingInput.value;
   const review = reviewInput.value;
-  const watched = !!alreadyWatchedInput.value;
+  const watched = alreadyWatchedInput.value ? "watched" : "not_watched";
 
   const msg = document.getElementById("msg");
   if (!title) {
@@ -655,11 +642,17 @@ function addMovieInfo() {
       ...authHeaders.value,
     },
     body: JSON.stringify({
-      title,
-      comment,
-      rating: parseInt(rating),
-      review,
-      watched,
+      movie: {
+        title,
+        comment,
+      },
+      watchlist: {
+        watched_status: watched,
+      },
+      review: {
+        rating: parseInt(rating),
+        review,
+      }
     }),
   })
     .then((response) => {
@@ -690,8 +683,13 @@ function editForm() {
   const comment = editCommentInput.value;
   const rating = editRatingInput.value;
   const review = editReviewInput.value;
-  const watched = editAlreadyWatchedInput.value;
+  const watched = editAlreadyWatchedInput.value ? "watched" : "not_watched";
 
+  console.log("title: ", title)
+  console.log("comment: ", comment)
+  console.log("rating: ", rating)
+  console.log("review: ", review)
+  console.log("watched: ", watched)
   const editMsg = document.getElementById("edit-msg");
   if (!title) {
     if (editMsg) editMsg.innerHTML = "Movie title cannot be blank";
@@ -705,6 +703,8 @@ function editForm() {
     return;
   }
 
+  console.log("selectedMovie.id: ", selectedMovie.id)
+  console.log("selectedMovie._id: ", selectedMovie._id)
   fetch(`${api}/${selectedMovie.id}`, {
     method: "PUT",
     headers: {
@@ -712,11 +712,17 @@ function editForm() {
       ...authHeaders.value,
     },
     body: JSON.stringify({
-      title,
-      comment,
-      rating: parseInt(rating),
-      review,
-      watched,
+      movie: {
+        title,
+        comment,
+      },
+      watchlist: {
+        watched_status: watched,
+      },
+      review: {
+        rating: parseInt(rating),
+        review,
+      }
     }),
   })
     .then((response) => {
@@ -787,7 +793,10 @@ function showUpdateErrorModal(errorMessage) {
 }
 
 function refreshMovies() {
-  fetch(api, {
+  console.log("refreshMovies called")
+  const watched_status = currentFilter.value
+  console.log("watched_status: ", watched_status)
+  fetch(`${api}/${watched_status}`, {
     headers: {
       ...authHeaders.value,
     },
@@ -809,7 +818,7 @@ function refreshMovies() {
       if (!movies) return;
 
       console.log("Movies received:", movies);
-      allMoviesData = movies; // Store all movies
+      filteredData.value = movies; // Store all movies
 
       // Check if the user is an admin
       if (movies.length > 0 && movies[0].hasOwnProperty("is_admin")) {
@@ -822,7 +831,7 @@ function refreshMovies() {
       console.log("User is admin: ", isAdmin.value);
 
       // Apply the current filter
-      filterMovies(currentFilter.value);
+      // filterMovies(currentFilter.value);
     })
     .catch((error) => {
       console.error("Error getting movies:", error);

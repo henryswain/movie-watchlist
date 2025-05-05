@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Union, Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from my_config import get_settings
@@ -75,9 +75,8 @@ def decode_jwt_token(token: str):
             if datetime.utcnow() > token_data.exp:
                 raise credentials_exception
                 
-    except JWTError:
+    except jwt.JWTError:
         raise credentials_exception
-    
     return token_data
 
 # Add this function to be imported in movie.py
