@@ -153,7 +153,7 @@
       </div>
     </div>
 
-    <!-- Add Modal -->
+    <!-- Add new movie Modal -->
     <div
       class="modal fade"
       id="addModal"
@@ -261,7 +261,7 @@
       </div>
     </div>
 
-    <!-- Edit Modal -->
+    <!-- Edit existing movie Modal -->
     <div
       class="modal fade"
       id="editModal"
@@ -315,7 +315,7 @@
               </div>
               <div class="mb-3">
                 <label for="edit-movie-rating" class="form-label"
-                  >Rating <i>(1 to 5 stars)</i></label
+                  >Rating <i>(1 to 5 stars. feel free to leave blank if you don't want to Rate the movie)</i></label
                 >
                 <input
                   type="hidden"
@@ -368,20 +368,6 @@
                   >Already Watched</label
                 >
               </div>
-              
-              <!-- Form Data Debugging
-              <div
-                v-if="selectedMovie && selectedMovie.id"
-                class="debug-info small text-muted mb-3"
-              >
-                <p class="mb-1">Form Data Debug:</p>
-                <ul class="mb-0 ps-3">
-                  <li>Title: {{ editTitleInput }}</li>
-                  <li>Comment: {{ editCommentInput }}</li>
-                  <li>Rating: {{ editRatingInput }}</li>
-                  <li>Watched: {{ editAlreadyWatchedInput ? "Yes" : "No" }}</li>
-                </ul>
-              </div> -->
 
               <div id="edit-msg" class="mb-3"></div>
               <button type="submit" class="btn btn-primary">
@@ -498,9 +484,8 @@ function filterMovies(filter) {
 
 
 async function tryEditMovie(id) {
-  console.log("id: ", id);
   
-    // Fetch the movie data
+    // Get movie data by id
     const response = await fetch(`${api}/get/${id}`, {
       method: "GET",
       headers: {
@@ -508,31 +493,22 @@ async function tryEditMovie(id) {
       }
     });
     
-    // Check HTTP response first
+    // Check HTTP response
     if (!response.ok) {
       console.error("Error fetching movie:", response.status);
       showUpdateErrorModal(`Failed to fetch movie: ${response.statusText}`);
       return;
     }
     
-    const movie = await response.json();
-    console.log("movie data: ", movie);
-    
+    const movie = await response.json();    
     isEditingAsAdmin.value = isAdmin.value && movie.added_by !== username;
-    
     selectedMovie = movie;
     
     // Populate form fields
     editTitleInput.value = movie.title;
     editCommentInput.value = movie.comment || "";
-    
-    // Handle rating
     editRatingInput.value = movie.rating || 0;
-    
-    // Handle review text
     editReviewInput.value = movie.review || "";
-    
-    // Handle watched status
     editAlreadyWatchedInput.value = movie.watched_status === "watched";
     
     const editMsg = document.getElementById("edit-msg");
@@ -567,10 +543,6 @@ function clearEditHoverRating() {
 }
 
 function deleteMovie(id) {
-  // Ask for confirmation, espeically for admin actions
-  const movie = filteredData.value.find((m) => m.id === id);
-  if (!movie) return;
-
   const username = getUsernameFromToken();
   const isAdminDeleting = isAdmin.value && movie.added_by !== username;
 
@@ -623,18 +595,22 @@ function showDeleteErrorModal(errorMessage) {
 }
 
 function addMovieInfo() {
-  const title = titleInput.value;
-  const comment = commentInput.value;
+
+  // prepare api inputs, initialize to empty srings if user left blank
+  const title = titleInput.value || "";
+  const comment = commentInput.value || "";
   const rating = ratingInput.value;
-  const review = reviewInput.value;
+  const review = reviewInput.value || "";
   const watched = alreadyWatchedInput.value ? "watched" : "not_watched";
 
+  // message indicating required fields
   const msg = document.getElementById("msg");
   if (!title) {
     if (msg) msg.innerHTML = "Movie title cannot be blank";
     return;
   }
 
+  // add movie info to database
   fetch(api, {
     method: "POST",
     headers: {
@@ -679,17 +655,14 @@ function addMovieInfo() {
 }
 
 function editForm() {
-  const title = editTitleInput.value;
-  const comment = editCommentInput.value;
+  // initiallize api inputs based on values from form, default to empty strings for fields left blank
+  const title = editTitleInput.value || "";
+  const comment = editCommentInput.value || "";
   const rating = editRatingInput.value;
-  const review = editReviewInput.value;
+  const review = editReviewInput.value || "";
   const watched = editAlreadyWatchedInput.value ? "watched" : "not_watched";
 
-  console.log("title: ", title)
-  console.log("comment: ", comment)
-  console.log("rating: ", rating)
-  console.log("review: ", review)
-  console.log("watched: ", watched)
+  // indicate required field left blank
   const editMsg = document.getElementById("edit-msg");
   if (!title) {
     if (editMsg) editMsg.innerHTML = "Movie title cannot be blank";
@@ -703,8 +676,7 @@ function editForm() {
     return;
   }
 
-  console.log("selectedMovie.id: ", selectedMovie.id)
-  console.log("selectedMovie._id: ", selectedMovie._id)
+  // update existing items in database
   fetch(`${api}/${selectedMovie.id}`, {
     method: "PUT",
     headers: {
@@ -793,9 +765,8 @@ function showUpdateErrorModal(errorMessage) {
 }
 
 function refreshMovies() {
-  console.log("refreshMovies called")
+  // initialize watched_status for use in api call to determine which items to return (all, watched, not watched, or my)
   const watched_status = currentFilter.value
-  console.log("watched_status: ", watched_status)
   fetch(`${api}/${watched_status}`, {
     headers: {
       ...authHeaders.value,
@@ -816,8 +787,6 @@ function refreshMovies() {
     })
     .then((movies) => {
       if (!movies) return;
-
-      console.log("Movies received:", movies);
       filteredData.value = movies; // Store all movies
 
       // Check if the user is an admin
@@ -829,9 +798,6 @@ function refreshMovies() {
       }
 
       console.log("User is admin: ", isAdmin.value);
-
-      // Apply the current filter
-      // filterMovies(currentFilter.value);
     })
     .catch((error) => {
       console.error("Error getting movies:", error);
