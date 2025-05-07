@@ -65,29 +65,49 @@ async def login_for_access_token(
     raise HTTPException(status_code=401, detail="Invalid username or password")
 
 
-@user_router.post("/sign-in")
-async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-) -> Token:
-    ## Authenticate user by verifying the user in DB
-    username = form_data.username
-    existing_user = await User.find_one(User.username == username)
-    if not existing_user:
+@user_router.post("/signup", status_code=status.HTTP_201_CREATED)
+async def signup_user(user_request: UserRequest) -> dict:
+    """Register a new user"""
+    # Check if username already exists
+    existing_user = await User.find_one(User.username == user_request.username)
+    if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid username or password",
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
         )
 
-    authenticated = hash_password.verify_hash(
-        form_data.password, existing_user.password
+    # Check if email already exists
+    existing_email = await User.find_one(User.email == user_request.email)
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists"
+        )
+
+    # Hash the password
+    hashed_password = hash_password.create_hash(user_request.password)
+
+    # Create new user
+    new_user = User(
+        username=user_request.username,
+        email=user_request.email,
+        password=hashed_password,
+        role="BasicUser",  # Default role for new users
     )
-    if authenticated:
-        access_token = create_access_token(
-            {"username": username, "role": existing_user.role}
-        )
-        return Token(access_token=access_token)
 
-    raise HTTPException(status_code=401, detail="Invalid username or password")
+    await new_user.insert()
+
+    return {"message": "User created successfully"}
+
+@user_router.get("/validate-token")
+async def validate_token(token_data: Annotated[TokenData, Depends(get_user)]) -> list[UserDto]:
+    return {
+        "username": token_data.username,
+        "role": token_data.role,
+        "valid": True
+    }
+
+@user_router.post("/logout")
+async def logout_user() -> dict:
+    return {"message": "Logged out successfully"}
 
 
 @user_router.get("")

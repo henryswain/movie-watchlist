@@ -537,14 +537,32 @@ async function tryEditMovie(id) {
   }
 
   const movie = await response.json();
-  isEditingAsAdmin.value = isAdmin.value && movie.added_by !== username;
+  isEditingAsAdmin.value =
+    isAdmin.value && movie.added_by !== getUsernameFromToken();
   selectedMovie = movie;
 
   // Populate form fields
   editTitleInput.value = movie.title;
   editCommentInput.value = movie.comment || "";
-  editRatingInput.value = movie.rating || 0;
-  editReviewInput.value = movie.review || "";
+
+  // Handle rating field - check all possible locations
+  if (movie.user_review && typeof movie.user_review.rating === "number") {
+    editRatingInput.value = movie.user_review.rating;
+  } else if (typeof movie.rating === "number") {
+    editRatingInput.value = movie.rating;
+  } else {
+    editRatingInput.value = 0;
+  }
+
+  // Handle review text - check all possible locations
+  if (movie.user_review && movie.user_review.review) {
+    editReviewInput.value = movie.user_review.review;
+  } else if (movie.review) {
+    editReviewInput.value = movie.review;
+  } else {
+    editReviewInput.value = "";
+  }
+
   editAlreadyWatchedInput.value = movie.watched_status === "watched";
 
   const editMsg = document.getElementById("edit-msg");
@@ -586,7 +604,8 @@ function deleteMovie(id) {
   }
 
   const username = getUsernameFromToken();
-  const isAdminDeleting = isAdmin.value && movie.added_by !== username;
+  const isAdminDeleting =
+    isAdmin.value && movie.added_by !== getUsernameFromToken();
 
   let confirmMessage = "Are you sure you want to delete this movie?";
   if (isAdminDeleting) {
@@ -715,7 +734,7 @@ function editForm() {
 
   // Check if the current user is the one who added the movie
   const username = getUsernameFromToken();
-  if (!isAdmin.value && selectedMovie.added_by !== username) {
+  if (!isAdmin.value && selectedMovie.added_by !== getUsernameFromToken()) {
     if (editMsg) editMsg.innerHTML = "You can only edit movies that you added";
     return;
   }
