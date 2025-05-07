@@ -8,8 +8,12 @@
         </div>
         <ul class="nav-links">
           <li><router-link to="/">Home</router-link></li>
-          <li v-if="isAuthenticated"><router-link to="/movies">Movies</router-link></li>
-          <li v-if="!isAuthenticated"><router-link to="/login">Log In</router-link></li>
+          <li v-if="isAuthenticated">
+            <router-link to="/movies">Movies</router-link>
+          </li>
+          <li v-if="!isAuthenticated">
+            <router-link to="/login">Log In</router-link>
+          </li>
           <li v-if="isAuthenticated">
             <a href="#" @click.prevent="logout" class="logout-link">
               <i class="fas fa-sign-out-alt"></i> Log Out
@@ -21,110 +25,131 @@
 
     <!-- Dynamic content based on the route -->
     <div class="content-container">
-      <router-view v-if="!isValidating" @login-success=""handleLoginSuccess></router-view>
+      <router-view
+        v-if="!isValidating"
+        @login-success=""
+        handleLoginSuccess
+      ></router-view>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
 
-const router = useRouter()
-const token = ref(localStorage.getItem('access_token'))
-const isValidating = ref(true)
+const router = useRouter();
+const token = ref(localStorage.getItem("access_token"));
+const isValidating = ref(true);
+
+// In App.vue, add methods to handle role tracking
+const userRole = ref(localStorage.getItem("user_role") || "BasicUser");
+
+// Update the computed property for admin status
+const isAdmin = computed(() => {
+  return userRole.value === "AdminUser";
+});
+
+// Update the handleLoginSuccess method
+const handleLoginSuccess = () => {
+  console.log("Login success event received");
+  token.value = localStorage.getItem("access_token");
+  userRole.value = localStorage.getItem("user_role") || "BasicUser";
+  console.log("User role from localStorage:", userRole.value);
+};
 
 // Computed property for authentication state
 const isAuthenticated = computed(() => {
-  console.log('isAuthenticated computed property, called token:', token.value)
-  return !!token.value
-})
-
-const handleLoginSuccess = () => {
-  console.log('Login success event received')
-  token.value = localStorage.getItem('access_token')
-}
+  console.log("isAuthenticated computed property, called token:", token.value);
+  return !!token.value;
+});
 
 // Watch for token changes in localStorage
-watch(() => localStorage.getItem('access_token'), (newToken) => {
-  token.value = newToken
-  console.log('Token changed:', newToken ? 'Token exists' : 'No token')
-})
+watch(
+  () => localStorage.getItem("access_token"),
+  (newToken) => {
+    token.value = newToken;
+    console.log("Token changed:", newToken ? "Token exists" : "No token");
+  }
+);
 
 // Validate token with backend
 async function validateToken() {
-  isValidating.value = true
+  isValidating.value = true;
   try {
-    const storedToken = localStorage.getItem('access_token')
+    const storedToken = localStorage.getItem("access_token");
     if (!storedToken) {
-      console.log('No token found in localStorage')
-      token.value = null
-      throw new Error('No token')
+      console.log("No token found in localStorage");
+      token.value = null;
+      throw new Error("No token");
     }
 
-    console.log('Validating token with backend...')
-    const response = await fetch('http://127.0.0.1:8000/users/validate-token', {
-      method: 'GET',
+    console.log("Validating token with backend...");
+    const response = await fetch("http://127.0.0.1:8000/users/validate-token", {
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${storedToken}`
-      }
-    })
+        Authorization: `Bearer ${storedToken}`,
+      },
+    });
 
     if (response.ok) {
-      console.log('Token validated successfully')
-      token.value = storedToken
+      console.log("Token validated successfully");
+      token.value = storedToken;
     } else {
-      console.log('Token validation failed:', response.status)
+      console.log("Token validation failed:", response.status);
       token.value = null;
-      throw new Error('Invalid token')
+      throw new Error("Invalid token");
     }
   } catch (error) {
-    console.error('Token validation error:', error.message)
+    console.error("Token validation error:", error.message);
     // Token is invalid or expired
-    localStorage.removeItem('access_token')
-    token.value = null
-    
+    localStorage.removeItem("access_token");
+    token.value = null;
+
     // Only redirect to login if user is trying to access a protected route
     if (router.currentRoute.value.meta?.requiresAuth) {
-      console.log('Redirecting to login page')
-      router.push('/login')
+      console.log("Redirecting to login page");
+      router.push("/login");
     }
   } finally {
-    isValidating.value = false
+    isValidating.value = false;
   }
 }
 
-// Logout function
+// Update the logout function to clear role
 async function logout() {
-  console.log('Logging out...')
+  console.log("Logging out...");
   try {
     // Invalidate token on backend
-    await fetch('http://127.0.0.1:8000/users/logout', {
-      method: 'POST',
+    await fetch("http://127.0.0.1:8000/users/logout", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token.value}`
-      }
-    })
-    console.log('Logout API call successful')
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+    console.log("Logout API call successful");
   } catch (error) {
-    console.error('Logout API call failed:', error)
+    console.error("Logout API call failed:", error);
   } finally {
-    localStorage.removeItem('access_token')
-    token.value = null
-    console.log('Redirecting to login page after logout')
-    router.push('/login')
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_role");
+    token.value = null;
+    userRole.value = "BasicUser";
+    console.log("Redirecting to login page after logout");
+    router.push("/login");
   }
 }
 
 // Check token on component mount
 onMounted(() => {
-  console.log('App component mounted')
-  validateToken()
-})
+  console.log("App component mounted");
+  validateToken();
+});
 </script>
 
 <style>
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
   margin: 0;
@@ -143,7 +168,7 @@ html, body {
   background-color: #5271ff;
   color: white;
   padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: fixed;
   width: 100%;
   top: 0;
@@ -186,7 +211,7 @@ html, body {
 }
 
 .nav-links a:hover {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .nav-links a.router-link-active {
@@ -232,7 +257,7 @@ html, body {
   .nav-links li {
     margin: 0.5rem 0.75rem;
   }
-  
+
   .content-container {
     margin-top: 120px; /* Adjust for bigger navbar on mobile */
     padding: 15px;

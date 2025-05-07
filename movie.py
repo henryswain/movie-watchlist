@@ -45,8 +45,6 @@ async def add_movie(
         date_added=datetime.now(),
     )
 
-
-
     # Save to database
     await new_movie.insert()
 
@@ -63,14 +61,12 @@ async def add_movie(
         await new_review.insert()
         print("Review saved with ID:", new_review.id)
 
-    
-
     # update watchlist
     new_watchlist_indicator = Watchlist(
         id=str(new_movie.id),
         watched_id=str(new_movie.id),
         user_id=current_user.username,
-        watched_status=watchlist_data.watched_status
+        watched_status=watchlist_data.watched_status,
     )
     await new_watchlist_indicator.insert()
     return new_movie
@@ -79,7 +75,8 @@ async def add_movie(
 @movie_router.get("/{watched_status}", response_model=List[MovieResponse])
 async def get_movies(
     watched_status: str = Path(..., description="The ID of the movie to retrieve"),
-    current_user: Optional[TokenData] = Depends(get_current_user)) -> List[MovieResponse]:
+    current_user: Optional[TokenData] = Depends(get_current_user),
+) -> List[MovieResponse]:
     """Get all movies with optional user-specific data"""
 
     # get watched data based on watched_status
@@ -88,10 +85,14 @@ async def get_movies(
         print("watched_status == 'all'")
         watched_information = await Watchlist.find_all().to_list()
     elif watched_status == "my":
-        watched_information = await Watchlist.find({"user_id": current_user.username}).to_list()
+        watched_information = await Watchlist.find(
+            {"user_id": current_user.username}
+        ).to_list()
     else:
         print("watched_status != 'all")
-        watched_information = await Watchlist.find({"watched_status": watched_status}).to_list()
+        watched_information = await Watchlist.find(
+            {"watched_status": watched_status}
+        ).to_list()
 
     watched_ids_as_objects = [ObjectId(doc.watched_id) for doc in watched_information]
 
@@ -117,6 +118,7 @@ async def get_movies(
 
     return movie_responses
 
+
 @movie_router.get("/get/{movie_id}", response_model=MovieResponse)
 async def get_movie_by_id(
     movie_id: str = Path(..., description="The ID of the movie to retrieve"),
@@ -124,7 +126,6 @@ async def get_movie_by_id(
 ) -> MovieResponse:
     """Get a specific movie by ID with optional user-specific data"""
 
-    
     # Get movie from database
     movie = await Movie.get(movie_id)
     if not movie:
@@ -132,19 +133,19 @@ async def get_movie_by_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Movie with ID={movie_id} not found",
         )
-    
+
     # Set admin status
     is_admin = False
     if current_user:
         user = await User.find_one({"username": current_user.username})
         if user and user.role == "AdminUser":
             is_admin = True
-    
+
     # Initialize with default values
     user_rating = 0
     user_review = ""
     watched_status = None
-    
+
     # Get user's review if logged in
     if current_user:
         review_data = await Review.find_one(
@@ -154,7 +155,7 @@ async def get_movie_by_id(
             user_rating = review_data.rating
             user_review = review_data.review
             print(f"Found review: {user_rating}, {user_review}")
-        
+
         # Get watchlist status
         watchlist_data = await Watchlist.find_one(
             {"watched_id": movie_id, "user_id": current_user.username}
@@ -162,7 +163,7 @@ async def get_movie_by_id(
         if watchlist_data:
             watched_status = watchlist_data.watched_status
             print(f"Watchlist status: {watched_status}")
-    
+
     # Create base response
     movie_response = MovieResponse(
         id=str(movie.id),
@@ -173,7 +174,7 @@ async def get_movie_by_id(
         added_by=movie.added_by,
         date_added=movie.date_added,
         watched_status=watched_status,
-        is_admin=is_admin
+        is_admin=is_admin,
     )
     return movie_response
 
@@ -197,6 +198,24 @@ async def update_movie(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Movie with ID={movie_id} not found",
+        )
+
+    # Check permissions - allow only if user is admin or the movie creator
+    if current_user:
+        # Get user to check if admin
+        user = await User.find_one({"username": current_user.username})
+        is_admin = user and user.role == "AdminUser"
+
+        # If not admin and not the creator, forbid the action
+        if not is_admin and movie.added_by != current_user.username:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You can only edit movies that you created.",
+            )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to edit movies.",
         )
 
     # Update movie fields
@@ -231,7 +250,9 @@ async def update_movie(
             await new_review.insert()
             print(f"Review created for movie ID: {movie_id}")
 
-    existing_watchlist = await Watchlist.find_one({"watched_id": movie_id, "user_id": current_user.username})
+    existing_watchlist = await Watchlist.find_one(
+        {"watched_id": movie_id, "user_id": current_user.username}
+    )
     existing_watchlist.watched_status = watchlist_data.watched_status
     await existing_watchlist.save()
     return movie
@@ -251,6 +272,24 @@ async def delete_movie(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Movie with ID={movie_id} not found",
+        )
+
+    # Check permissions - allow only if user is admin or the movie creator
+    if current_user:
+        # Get user to check if admin
+        user = await User.find_one({"username": current_user.username})
+        is_admin = user and user.role == "AdminUser"
+
+        # If not admin and not the creator, forbid the action
+        if not is_admin and movie.added_by != current_user.username:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You can only delete movies that you created.",
+            )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to delete movies.",
         )
 
     # Delete movie

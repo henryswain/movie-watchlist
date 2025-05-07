@@ -126,7 +126,11 @@
               class="fas fa-edit"
               data-bs-toggle="modal"
               data-bs-target="#editModal"
-              :title="isAdmin ? 'Edit movie (admin)' : 'Edit movie'"
+              :title="
+                isAdmin && movie.added_by !== getUsernameFromToken()
+                  ? 'Edit movie (admin)'
+                  : 'Edit movie'
+              "
               :class="{
                 'admin-action':
                   isAdmin && movie.added_by !== getUsernameFromToken(),
@@ -137,11 +141,16 @@
               class="fas fa-edit disabled"
               title="You can only edit movies you added"
             ></i>
+
             <i
               v-if="isAdmin || movie.added_by === getUsernameFromToken()"
               @click="deleteMovie(movie.id)"
               class="fas fa-trash-alt"
-              :title="isAdmin ? 'Delete movie (admin)' : 'Delete movie'"
+              :title="
+                isAdmin && movie.added_by !== getUsernameFromToken()
+                  ? 'Delete movie (admin)'
+                  : 'Delete movie'
+              "
               :class="{
                 'admin-action':
                   isAdmin && movie.added_by !== getUsernameFromToken(),
@@ -447,10 +456,30 @@ const editHoverRating = ref(0);
 const selectedDates = ref({});
 
 // Admin state - track if current user is an admin
-const isAdmin = ref(false);
+const userRole = ref(localStorage.getItem("user_role") || "BasicUser");
 const isEditingAsAdmin = ref(false);
+const isAdmin = computed(() => {
+  // First check local storage directly
+  if (userRole.value === "AdminUser") {
+    return true;
+  }
+
+  // Then verify with JWT token
+  const tokenAdmin = checkAdminRole();
+  if (tokenAdmin) {
+    // If the token says we're admin but localStorage doesn't, update localStorage
+    if (userRole.value !== "AdminUser") {
+      userRole.value = "AdminUser";
+      localStorage.setItem("user_role", "AdminUser");
+    }
+    return true;
+  }
+
+  return false;
+});
 
 // Check if user has admin role from JWT token
+// Improved admin role check function
 function checkAdminRole() {
   const token = localStorage.getItem("access_token");
   if (!token) return false;
@@ -460,10 +489,12 @@ function checkAdminRole() {
     const decodedPayload = atob(payload);
     const payloadData = JSON.parse(decodedPayload);
 
-    // Return true if role is Admin
+    console.log("Token payload:", payloadData); // For debugging
+
+    // Check if the role is AdminUser
     return payloadData.role === "AdminUser";
   } catch (e) {
-    onslotchange.error("Error checking admin role:", e);
+    console.error("Error checking admin role:", e);
     return false;
   }
 }
@@ -548,12 +579,21 @@ function clearEditHoverRating() {
 }
 
 function deleteMovie(id) {
+  const movie = filteredData.value.find((movie) => movie.id === id);
+  if (!movie) {
+    console.error("Movie not found", id);
+    return;
+  }
+
   const username = getUsernameFromToken();
   const isAdminDeleting = isAdmin.value && movie.added_by !== username;
 
   let confirmMessage = "Are you sure you want to delete this movie?";
   if (isAdminDeleting) {
     confirmMessage = `ADMIN ACTION: Are you sure you wat to delete "${movie.title}" added by ${movie.added_by}?`;
+  }
+  if (!confirm(confirmMessage)) {
+    return;
   }
 
   fetch(`${api}/${id}`, {
@@ -869,14 +909,17 @@ END:VCALENDAR`;
 // Make sure token is refreshed at mount time
 onMounted(() => {
   token.value = localStorage.getItem("access_token");
+  userRole.value = localStorage.getItem("user_role") || "BasicUser";
+
+  console.log("Movies.vue mounted, user role:", userRole.value);
+  console.log("Admin from token:", checkAdminRole());
+  console.log("Is admin (computed):", isAdmin.value);
 
   if (!token.value) {
     router.push("/login");
     return;
   }
 
-  // Initial check for admin status
-  isAdmin.value = checkAdminRole();
   refreshMovies();
 });
 </script>

@@ -1,21 +1,15 @@
 <template>
   <div class="auth-page">
     <div class="tabs">
-      <button 
-        :class="{ active: mode==='login' }" 
-        @click="mode = 'login'"
-      >
+      <button :class="{ active: mode === 'login' }" @click="mode = 'login'">
         Log In
       </button>
-      <button 
-        :class="{ active: mode==='signup' }" 
-        @click="mode = 'signup'"
-      >
+      <button :class="{ active: mode === 'signup' }" @click="mode = 'signup'">
         Sign Up
       </button>
     </div>
 
-    <form v-if="mode==='login'" @submit.prevent="submitLogin" class="form">
+    <form v-if="mode === 'login'" @submit.prevent="submitLogin" class="form">
       <h2>Log In</h2>
       <div class="field">
         <label>Username</label>
@@ -50,71 +44,79 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-const router   = useRouter()
-const apiBase  = 'http://127.0.0.1:8000'
-const mode     = ref('login')     // 'login' or 'signup'
+const router = useRouter();
+const apiBase = "http://127.0.0.1:8000";
+const mode = ref("login"); // 'login' or 'signup'
 
 // login state
-const loginUsername = ref('')
-const loginPassword = ref('')
-const loginError    = ref('')
+const loginUsername = ref("");
+const loginPassword = ref("");
+const loginError = ref("");
 
 // signup state
-const signupUsername = ref('')
-const signupEmail    = ref('')
-const signupPassword = ref('')
-const signupError    = ref('')
+const signupUsername = ref("");
+const signupEmail = ref("");
+const signupPassword = ref("");
+const signupError = ref("");
 
 // LOG IN
 async function submitLogin() {
-  loginError.value = ''
+  loginError.value = "";
   try {
-    const form = new URLSearchParams()
-    form.append('username', loginUsername.value)
-    form.append('password', loginPassword.value)
+    const form = new URLSearchParams();
+    form.append("username", loginUsername.value);
+    form.append("password", loginPassword.value);
 
     const res = await fetch(`${apiBase}/users/sign-in`, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/x-www-form-urlencoded' },
-      body: form.toString()
-    })
-    const data = await res.json()
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const data = await res.json();
     if (res.ok && data.access_token) {
-      localStorage.setItem('access_token', data.access_token)
-      router.push('/movies')
+      // Store token and role
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("user_role", data.role || "BasicUser");
+
+      console.log("Login successful, role:", data.role);
+      // Emit login success event
+      emit("login-success");
+
+      // Navigate to movies page
+      router.push("/movies");
     } else {
-      loginError.value = data.detail || 'Invalid credentials'
+      loginError.value = data.detail || "Invalid credentials";
     }
   } catch {
-    loginError.value = 'Network error'
+    loginError.value = "Network error";
   }
 }
 
 // SIGN UP
 async function submitSignup() {
-  signupError.value = ''
+  signupError.value = "";
   try {
     const res = await fetch(`${apiBase}/users/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         username: signupUsername.value,
-        email:    signupEmail.value,
-        password: signupPassword.value
-      })
-    })
-    const data = await res.json()
+        email: signupEmail.value,
+        password: signupPassword.value,
+      }),
+    });
+    const data = await res.json();
     if (res.ok && data.message) {
       // after signup, switch to login mode
-      mode.value = 'login'
+      mode.value = "login";
     } else {
-      signupError.value = data.detail || 'Signup failed'
+      signupError.value = data.detail || "Signup failed";
     }
   } catch {
-    signupError.value = 'Network error'
+    signupError.value = "Network error";
   }
 }
 </script>
@@ -126,7 +128,7 @@ async function submitSignup() {
   background: #fff;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .tabs {
   display: flex;
