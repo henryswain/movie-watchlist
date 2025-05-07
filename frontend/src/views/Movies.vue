@@ -426,6 +426,7 @@ watch(
 onBeforeMount(() => {
   if (!token.value) {
     router.push("/login");
+    return;
   }
 });
 
