@@ -62,10 +62,14 @@
           <div class="movie-header">
             <div class="movie-title-rating">
               <h4>{{ movie.title }}</h4>
-              <div class="movie-rating">
-                <span class="star-display">
-                  {{ "★".repeat(movie.user_review?.rating || 0)
-                  }}{{ "☆".repeat(5 - (movie.user_review?.rating || 0)) }}
+              <div class="movie-ratingidsplay">
+                <span class="star-rating-display">
+                  {{ "★".repeat(movie.user_review?.rating || movie.rating || 0)
+                  }}{{
+                    "☆".repeat(
+                      5 - (movie.user_review?.rating || movie.rating || 0)
+                    )
+                  }}
                 </span>
               </div>
             </div>
@@ -315,7 +319,11 @@
               </div>
               <div class="mb-3">
                 <label for="edit-movie-rating" class="form-label"
-                  >Rating <i>(1 to 5 stars. feel free to leave blank if you don't want to Rate the movie)</i></label
+                  >Rating
+                  <i
+                    >(1 to 5 stars. feel free to leave blank if you don't want
+                    to Rate the movie)</i
+                  ></label
                 >
                 <input
                   type="hidden"
@@ -477,42 +485,39 @@ function formatDate(dateString) {
 
 function filterMovies(filter) {
   currentFilter.value = filter;
-  const filter2 = currentFilter.value
-  refreshMovies(filter2)
-
+  const filter2 = currentFilter.value;
+  refreshMovies(filter2);
 }
 
-
 async function tryEditMovie(id) {
-  
-    // Get movie data by id
-    const response = await fetch(`${api}/get/${id}`, {
-      method: "GET",
-      headers: {
-        ...authHeaders.value,
-      }
-    });
-    
-    // Check HTTP response
-    if (!response.ok) {
-      console.error("Error fetching movie:", response.status);
-      showUpdateErrorModal(`Failed to fetch movie: ${response.statusText}`);
-      return;
-    }
-    
-    const movie = await response.json();    
-    isEditingAsAdmin.value = isAdmin.value && movie.added_by !== username;
-    selectedMovie = movie;
-    
-    // Populate form fields
-    editTitleInput.value = movie.title;
-    editCommentInput.value = movie.comment || "";
-    editRatingInput.value = movie.rating || 0;
-    editReviewInput.value = movie.review || "";
-    editAlreadyWatchedInput.value = movie.watched_status === "watched";
-    
-    const editMsg = document.getElementById("edit-msg");
-    if (editMsg) editMsg.innerHTML = "";
+  // Get movie data by id
+  const response = await fetch(`${api}/get/${id}`, {
+    method: "GET",
+    headers: {
+      ...authHeaders.value,
+    },
+  });
+
+  // Check HTTP response
+  if (!response.ok) {
+    console.error("Error fetching movie:", response.status);
+    showUpdateErrorModal(`Failed to fetch movie: ${response.statusText}`);
+    return;
+  }
+
+  const movie = await response.json();
+  isEditingAsAdmin.value = isAdmin.value && movie.added_by !== username;
+  selectedMovie = movie;
+
+  // Populate form fields
+  editTitleInput.value = movie.title;
+  editCommentInput.value = movie.comment || "";
+  editRatingInput.value = movie.rating || 0;
+  editReviewInput.value = movie.review || "";
+  editAlreadyWatchedInput.value = movie.watched_status === "watched";
+
+  const editMsg = document.getElementById("edit-msg");
+  if (editMsg) editMsg.innerHTML = "";
 }
 
 // Star Rating Functions
@@ -595,7 +600,6 @@ function showDeleteErrorModal(errorMessage) {
 }
 
 function addMovieInfo() {
-
   // prepare api inputs, initialize to empty srings if user left blank
   const title = titleInput.value || "";
   const comment = commentInput.value || "";
@@ -628,7 +632,7 @@ function addMovieInfo() {
       review: {
         rating: parseInt(rating),
         review,
-      }
+      },
     }),
   })
     .then((response) => {
@@ -694,7 +698,7 @@ function editForm() {
       review: {
         rating: parseInt(rating),
         review,
-      }
+      },
     }),
   })
     .then((response) => {
@@ -766,7 +770,7 @@ function showUpdateErrorModal(errorMessage) {
 
 function refreshMovies() {
   // initialize watched_status for use in api call to determine which items to return (all, watched, not watched, or my)
-  const watched_status = currentFilter.value
+  const watched_status = currentFilter.value;
   fetch(`${api}/${watched_status}`, {
     headers: {
       ...authHeaders.value,
@@ -1012,9 +1016,22 @@ body {
 }
 .movie-title-rating {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   width: 100%;
+}
+
+.movie-title-rating h4 {
+  margin-bottom: 5px;
+}
+
+.movie-rating-banner {
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+  border-left: 4px solid #ffd700;
 }
 
 .movie-rating .star-display {
@@ -1027,9 +1044,16 @@ body {
   margin: 5px 0;
 }
 
-.star-rating {
-  display: flex;
-  margin: 5px 0;
+.star-rating-display {
+  color: #ffd700;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+}
+
+.rating-value {
+  margin-left: 8px;
+  font-weight: bold;
+  color: #555;
 }
 
 .star {

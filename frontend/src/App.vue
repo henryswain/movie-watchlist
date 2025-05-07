@@ -9,10 +9,10 @@
         <ul class="nav-links">
           <li><router-link to="/">Home</router-link></li>
           <li v-if="isAuthenticated"><router-link to="/movies">Movies</router-link></li>
-          <li v-if="!isAuthenticated"><router-link to="/login">Login</router-link></li>
+          <li v-if="!isAuthenticated"><router-link to="/login">Log In</router-link></li>
           <li v-if="isAuthenticated">
             <a href="#" @click.prevent="logout" class="logout-link">
-              <i class="fas fa-sign-out-alt"></i> Logout
+              <i class="fas fa-sign-out-alt"></i> Log Out
             </a>
           </li>
         </ul>
@@ -21,7 +21,7 @@
 
     <!-- Dynamic content based on the route -->
     <div class="content-container">
-      <router-view v-if="!isValidating"></router-view>
+      <router-view v-if="!isValidating" @login-success=""handleLoginSuccess></router-view>
     </div>
   </div>
 </template>
@@ -35,7 +35,15 @@ const token = ref(localStorage.getItem('access_token'))
 const isValidating = ref(true)
 
 // Computed property for authentication state
-const isAuthenticated = computed(() => !!token.value)
+const isAuthenticated = computed(() => {
+  console.log('isAuthenticated computed property, called token:', token.value)
+  return !!token.value
+})
+
+const handleLoginSuccess = () => {
+  console.log('Login success event received')
+  token.value = localStorage.getItem('access_token')
+}
 
 // Watch for token changes in localStorage
 watch(() => localStorage.getItem('access_token'), (newToken) => {
@@ -50,6 +58,7 @@ async function validateToken() {
     const storedToken = localStorage.getItem('access_token')
     if (!storedToken) {
       console.log('No token found in localStorage')
+      token.value = null
       throw new Error('No token')
     }
 
@@ -66,6 +75,7 @@ async function validateToken() {
       token.value = storedToken
     } else {
       console.log('Token validation failed:', response.status)
+      token.value = null;
       throw new Error('Invalid token')
     }
   } catch (error) {
