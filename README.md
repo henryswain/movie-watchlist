@@ -4,12 +4,15 @@ A web application to track and manage your movie watchlist. Keep track of movies
 
 ## Features
 
-- Add movies with title, director, and release year information
+- Add movies with Title, Comment, Rating, and a Review about that rating
 - Mark movies as watched or unwatched
-- Filter your list to show all movies, only watched movies, or only unwatched movies
+- Filter your list to show all movies, only watched movies, only unwatched movies, or just your movies
 - Edit movie details
 - Delete movies from your list
 - Toggle watched/unwatched status with a single click
+
+- Basic Users: Only able to edit or delete movies that they themselves have added to the list
+- Admin Users: Able to edit and delete all movies in the list
 
 ## Technologies Used
 
