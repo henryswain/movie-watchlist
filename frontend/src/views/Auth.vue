@@ -47,6 +47,8 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
+const emit = defineEmits(['login-success']);
+
 const router = useRouter();
 const apiBase = "http://127.0.0.1:8000";
 const mode = ref("login"); // 'login' or 'signup'

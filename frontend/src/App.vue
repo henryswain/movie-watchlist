@@ -27,7 +27,7 @@
     <div class="content-container">
       <router-view
         v-if="!isValidating"
-        @login-success=""
+        @login-success="handleLoginSucces"
         handleLoginSuccess
       ></router-view>
     </div>
