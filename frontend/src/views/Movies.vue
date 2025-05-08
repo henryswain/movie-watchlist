@@ -1165,17 +1165,21 @@ body {
 }
 
 .movie-metadata {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.05); /* Very light background */
   padding: 8px 12px;
   border-radius: 4px;
   margin-bottom: 8px;
   font-size: 0.9rem;
+  /* made a subtle border instead of dark background */
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+/* Using darker colors for lighter backgrounds */
 .movie-metadata p {
   margin: 4px 0;
   display: flex;
   align-items: center;
+  color: #333; 
 }
 
 .movie-metadata i {
