@@ -55,10 +55,10 @@
         </div>
 
         <div
-          v-for="movie in filteredData"
-          :key="movie.id"
-          :class="`movie-card ${movie.watched ? 'watched' : 'unwatched'}`"
-        >
+  v-for="movie in filteredData"
+  :key="movie.id"
+  :class="`movie-card ${movie.watched_status === 'watched' ? 'watched' : 'unwatched'}`"
+>
           <div class="movie-header">
             <div class="movie-title-rating">
               <h4>{{ movie.title }}</h4>

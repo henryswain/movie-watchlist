@@ -56,13 +56,13 @@ class Watchlist(Document):
 class MovieResponse(BaseModel):
     id: str
     title: str
-    comment: str
-    review: Optional[str] = None  # Make review optional for response
+    comment: Optional[str] = ""
+    review: Optional[str] = ""
     added_by: str
-    date_added: datetime
-    rating: int = Field(..., ge=0, le=5)  # Rating between 0-5
-    watched_status: Optional[str] = None
-    is_admin: bool = False
+    rating: Optional[float] = 0
+    date_added: Optional[datetime] = None
+    watched_status: Optional[str] = "not_watched"
+    is_admin: Optional[bool] = False
 
 # New: Response models for reviews and watchlist
 class ReviewResponse(BaseModel):

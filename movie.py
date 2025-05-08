@@ -88,45 +88,68 @@ async def get_movies(
     current_user: Optional[TokenData] = Depends(get_current_user),
 ) -> List[MovieResponse]:
     """Get all movies with optional user-specific data"""
+    try:
+        # get watched data based on watched_status
+        watched_information = []
+        if watched_status == "all":
+            print("watched_status == 'all'")
+            watched_information = await Watchlist.find_all().to_list()
+        elif watched_status == "my":
+            watched_information = await Watchlist.find(
+                {"user_id": current_user.username}
+            ).to_list()
+        else:
+            print("watched_status != 'all")
+            watched_information = await Watchlist.find(
+                {"watched_status": watched_status}
+            ).to_list()
 
-    # get watched data based on watched_status
-    watched_information = []
-    if watched_status == "all":
-        print("watched_status == 'all'")
-        watched_information = await Watchlist.find_all().to_list()
-    elif watched_status == "my":
-        watched_information = await Watchlist.find(
-            {"user_id": current_user.username}
-        ).to_list()
-    else:
-        print("watched_status != 'all")
-        watched_information = await Watchlist.find(
-            {"watched_status": watched_status}
-        ).to_list()
+        # Create a dictionary to map movie IDs to their watched status
+        watchlist_map = {doc.watched_id: doc.watched_status for doc in watched_information}
+        
+        watched_ids_as_objects = [ObjectId(doc.watched_id) for doc in watched_information]
 
-    watched_ids_as_objects = [ObjectId(doc.watched_id) for doc in watched_information]
+        # get movies with the gathered watched information
+        movies = await Movie.find({"_id": {"$in": watched_ids_as_objects}}).to_list()
+        movie_responses = []
 
-    # get movies with the gathered watched information
-    movies = await Movie.find({"_id": {"$in": watched_ids_as_objects}}).to_list()
-    movie_responses = []
+        for movie in movies:
+            # get review data
+            review = await Review.find_one({"movie_id": str(movie.id)})
+            if not review:
+                # Handle case where a movie doesn't have a review
+                logger.warning(f"No review found for movie {movie.id} - {movie.title}")
+                review_text = ""
+                rating = 0
+            else:
+                review_text = review.review
+                rating = review.rating
 
-    for movie in movies:
-        # get review data
-        review = await Review.find_one({"movie_id": str(movie.id)})
+            # Get watched status from the map, default to "not_watched"
+            movie_watched_status = watchlist_map.get(str(movie.id), "not_watched")
 
-        movie_response = MovieResponse(
-            id=str(movie.id),
-            title=movie.title,
-            comment=movie.comment,
-            review=review.review,  # Include review in the response
-            added_by=movie.added_by,
-            rating=review.rating,
-            date_added=movie.date_added,
+            movie_response = MovieResponse(
+                id=str(movie.id),
+                title=movie.title,
+                comment=movie.comment,
+                review=review_text,
+                added_by=movie.added_by,
+                rating=rating,
+                date_added=movie.date_added,
+                watched_status=movie_watched_status  # Include the watched status
+            )
+
+            movie_responses.append(movie_response)
+
+        return movie_responses
+    
+    except Exception as e:
+        # Log the error and return a more helpful message
+        logger.error(f"Error in get_movies: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error getting movies: {str(e)}"
         )
-
-        movie_responses.append(movie_response)
-
-    return movie_responses
 
 
 @movie_router.get("/get/{movie_id}", response_model=MovieResponse)
