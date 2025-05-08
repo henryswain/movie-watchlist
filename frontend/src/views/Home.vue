@@ -17,6 +17,11 @@
         <li><strong>Watchlist</strong> to mark what you have watched, what you plan to watch, and when.</li>
         <li><strong>Export reminders</strong> with calendar invites for scheduled viewings.</li>
       </ul>
+      <h3>Rules</h3>
+      <p>
+        We are committed to creating a safe and inclusive environment for all users.
+        Report any innappropriate content to any admin.
+      </p>
     </section>
   </div>
 </template>

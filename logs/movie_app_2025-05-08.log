@@ -98,3 +98,7 @@
 2025-05-08 10:45:41,261 - INFO - Application starts up...
 2025-05-08 10:45:46,993 - INFO - Token validated for user 'marcusb'. Role: BasicUser
 2025-05-08 10:45:52,174 - INFO - User 'marcusb' successfully signed in. Role: BasicUser
+2025-05-08 10:55:30,570 - INFO - Token validated for user 'marcusb'. Role: BasicUser
+2025-05-08 10:55:35,206 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 10:56:50,492 - INFO - Token validated for user 'marcusb'. Role: AdminUser
+2025-05-08 10:56:57,101 - INFO - User 'marcusb' successfully signed in. Role: AdminUser

@@ -11,6 +11,11 @@
           <li v-if="isAuthenticated">
             <router-link to="/movies">Movies</router-link>
           </li>
+          <li v-if="isAdmin" class="admin-badge-nav">
+    <span class="admin-badge">
+      <i class="fas fa-shield-alt"></i> Admin
+    </span>
+  </li>
           <li v-if="!isAuthenticated">
             <router-link to="/login">Log In</router-link>
           </li>
@@ -41,7 +46,7 @@ const router = useRouter();
 const token = ref(localStorage.getItem("access_token"));
 const isValidating = ref(true);
 
-// In App.vue, add methods to handle role tracking
+//  handle role tracking
 const userRole = ref(localStorage.getItem("user_role") || "BasicUser");
 
 // Update the computed property for admin status
@@ -155,6 +160,26 @@ body {
   overflow-x: hidden;
   font-family: sans-serif;
   background-color: #e5e5e5;
+}
+.admin-badge-nav {
+  margin-right: auto; 
+}
+
+.admin-badge {
+  background-color: #dc3545;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.admin-badge i {
+  font-size: 1rem;
 }
 
 #app {

@@ -1,19 +1,5 @@
 <template>
   <div class="main-content">
-    <div class="notification-banner">
-      <p class="notification text">
-        <i class="fas fa-info-circle">
-          If you believe any movie contains inappropriate content, please email
-          the admin to report it.
-        </i>
-      </p>
-    </div>
-
-    <!-- Admin badge for admin users -->
-    <div v-if="isAdmin" class="admin-badge">
-      <i class="fas fa-shield-alt"></i> Administrator Mode
-    </div>
-
     <div class="container d-flex justify-content-center align-items-center">
       <div class="app">
         <h2 class="text-center mb-4">FilmTrack</h2>
