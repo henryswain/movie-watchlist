@@ -15,4 +15,6 @@ venv.bak/
 # IDE
 .vscode/*
 
-# Others
+# Log files
+*.log
+movie_app_*.log
