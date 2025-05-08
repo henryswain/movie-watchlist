@@ -102,3 +102,55 @@
 2025-05-08 10:55:35,206 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
 2025-05-08 10:56:50,492 - INFO - Token validated for user 'marcusb'. Role: AdminUser
 2025-05-08 10:56:57,101 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 11:52:56,566 - INFO - Application starts up...
+2025-05-08 11:52:59,499 - INFO - Application starts up...
+2025-05-08 11:53:14,800 - INFO - Token validated for user 'marcusb'. Role: AdminUser
+2025-05-08 11:53:21,801 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 11:54:03,067 - INFO - Token validated for user 'marcusb'. Role: AdminUser
+2025-05-08 11:54:07,941 - INFO - User 'marcusb' successfully signed in. Role: BasicUser
+2025-05-08 11:54:33,764 - INFO - Movie 'aaa' added by user 'marcusb'. Role: BasicUser 
+2025-05-08 11:54:33,805 - INFO - Review added for movie 'aaa' by user 'marcusb'. Rating: 4
+2025-05-08 11:55:53,131 - INFO - Token validated for user 'marcusb'. Role: BasicUser
+2025-05-08 11:55:57,281 - INFO - User 'marcusb' successfully signed in. Role: BasicUser
+2025-05-08 11:56:22,015 - INFO - Movie 'Ted 2' added by user 'marcusb'. Role: BasicUser 
+2025-05-08 11:56:22,057 - INFO - Review added for movie 'Ted 2' by user 'marcusb'. Rating: 5
+2025-05-08 11:58:50,083 - INFO - Token validated for user 'marcusb'. Role: BasicUser
+2025-05-08 11:58:57,288 - INFO - User 'marcusb' successfully signed in. Role: BasicUser
+2025-05-08 11:59:31,414 - INFO - Movie 'refresh' added by user 'marcusb'. Role: BasicUser 
+2025-05-08 11:59:31,454 - INFO - Review added for movie 'refresh' by user 'marcusb'. Rating: 2
+2025-05-08 12:01:47,139 - INFO - Token validated for user 'marcusb'. Role: BasicUser
+2025-05-08 12:01:51,957 - INFO - User 'marcusb' successfully signed in. Role: Adminuser
+2025-05-08 12:02:24,136 - INFO - Token validated for user 'marcusb'. Role: Adminuser
+2025-05-08 12:02:30,332 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 12:02:47,603 - INFO - Admin User 'marcusb' edited movie 'Ted 2'. Role: AdminUser
+2025-05-08 12:02:47,719 - INFO - Admin updated review for movie 'Ted 2' originally added by 'marcusb'. Rating: 5
+2025-05-08 12:02:47,874 - INFO - Watchlist updated for movie 'Ted 2' by user 'marcusb'. Status: not_watched
+2025-05-08 12:29:45,966 - INFO - Token validated for user 'marcusb'. Role: AdminUser
+2025-05-08 12:30:27,574 - ERROR - Failed login attempt for username 'marcusb': Invalid password
+2025-05-08 12:30:38,812 - INFO - Application shuts down...
+2025-05-08 12:30:42,527 - INFO - Application starts up...
+2025-05-08 12:30:58,794 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 12:31:00,888 - INFO - User: 'marcusb' logged out. Role: AdminUser
+2025-05-08 12:31:06,728 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 12:32:15,106 - INFO - User: 'marcusb' logged out. Role: AdminUser
+2025-05-08 12:32:52,826 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 12:33:31,989 - INFO - Admin User 'marcusb' deleted movie 'Interstellar'. Role: AdminUser
+2025-05-08 12:33:49,744 - INFO - User: 'marcusb' logged out. Role: AdminUser
+2025-05-08 12:34:08,145 - INFO - User 'henryswain' successfully signed in. Role: BasicUser
+2025-05-08 12:34:54,427 - INFO - User 'henryswain' edited movie 'the matrix'. Role: BasicUser
+2025-05-08 12:34:54,541 - INFO - Review updated for movie 'the matrix' by user 'henryswain'. Rating: 5
+2025-05-08 12:34:54,609 - INFO - Watchlist updated for movie 'the matrix' by user 'henryswain'. Status: watched
+2025-05-08 12:39:11,270 - INFO - User: 'henryswain' logged out. Role: BasicUser
+2025-05-08 12:39:15,752 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 12:39:37,835 - INFO - Admin User 'marcusb' deleted movie 'the matrix'. Role: AdminUser
+2025-05-08 12:40:01,107 - INFO - User: 'marcusb' logged out. Role: AdminUser
+2025-05-08 12:42:03,580 - ERROR - Failed login attempt for username 'henryswain': Invalid password
+2025-05-08 12:42:16,008 - INFO - User 'henryswain' successfully signed in. Role: BasicUser
+2025-05-08 12:51:40,873 - INFO - Token validated for user 'henryswain'. Role: BasicUser
+2025-05-08 12:54:18,585 - INFO - Application shuts down...
+2025-05-08 12:54:30,997 - INFO - Application starts up...
+2025-05-08 12:55:39,924 - INFO - User 'marcusb' successfully signed in. Role: AdminUser
+2025-05-08 12:55:54,818 - INFO - User: 'marcusb' logged out. Role: AdminUser
+2025-05-08 15:39:21,250 - INFO - Application shuts down...
+2025-05-08 15:39:23,106 - INFO - Application starts up...
+2025-05-08 15:39:27,013 - INFO - Application shuts down...

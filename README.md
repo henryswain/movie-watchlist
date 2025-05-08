@@ -1,54 +1,93 @@
-# Movie Watchlist
+# FilmTrack - Movie Watchlist Application
+FilmTrack is a web application for tracking movies you've watched or want to watch. Users can add movies, rate them, write reviews, and organize them by watched status. The application features user authentication, with differentiated access for regular users and administrators.
+# Project Overview
+This project combines:
 
-A web application to track and manage your movie watchlist. Keep track of movies you've watched and movies you plan to watch in the future.
+Frontend: Vue.js application with responsive UI
+Backend: FastAPI (Python) REST API
+Database: MongoDB for data storage
 
-## Features
+# Key Features
 
-- Add movies with Title, Comment, Rating, and a Review about that rating
-- Mark movies as watched or unwatched
-- Filter your list to show all movies, only watched movies, only unwatched movies, or just your movies
-- Edit movie details
-- Delete movies from your list
-- Toggle watched/unwatched status with a single click
+- User authentication with JWT tokens
+- Add movies with titles, comments, and ratings
+- Mark movies as watched/unwatched
+- Write and view movie reviews
+- Filter movies by status (all, watched, not watched, my movies)
+- Schedule viewing dates with calendar event export
+- Administrative privileges for managing all content
 
-- Basic Users: Only able to edit or delete movies that they themselves have added to the list
-- Admin Users: Able to edit and delete all movies in the list
+# Installation & Setup
+## Prerequisites
 
-## Technologies Used
+- Python 3.10+
+- Node.js and npm
+- MongoDB (local instance or MongoDB Atlas)
 
-- **Backend**: FastAPI (Python)
-- **Frontend**: 
-  - HTML
-  - CSS
-  - JavaScript
-  - Bootstrap 5 for responsive design
-  - Font Awesome 6 for icons
+# Backend Setup
 
-## Installation
+1. Clone the repository:
+- git clone https://github.com/henryswain/movie-watchlist.git
+- cd movie-watchlist
 
-1. Clone this repository
-```bash
-git clone https://github.com/yourusername/movie-watchlist.git
-cd movie-watchlist
+2. Create and activate a Python virtual environment:
+###  On Windows
+- python -m venv venv
+- venv\Scripts\activate
 
-2. Create and activate a virtual environment
-# For Windows
-python -m venv venv
-venv\Scripts\activate
+### On macOS/Linux
+- python -m venv venv
+- source venv/bin/activate
 
-# For macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
+3. Install Python dependencies:
+- pip install -r requirements.txt
 
-3. Install the required dependencies
-pip install fastapi uvicorn
+4. Configure your MongoDB connection:
 
-4. Run the application
-uvicorn main:app --reload
+- Create a .env file in the project root (or update my_config.py)  
+- Add your MongoDB connection string:  
+MONGODB_URL=mongodb+srv://yourusername:yourpassword@yourcluster.mongodb.net/filmtrack
+SECRET_KEY=your_jwt_secret_key
 
-5. Open your browser and navigate to http://127.0.0.1:8000
-```
-# Demo
-![Example](pic1.png)
-![Edit Function](pic2.png)
-![Filter Function](pic3.png)
+
+
+
+## Frontend Setup
+
+1. Navigate to the frontend directory:  
+cd frontend
+
+- Install Node.js dependencies:  
+- npm install
+
+
+## Running the Application
+# Starting the Backend Server  
+From the project root directory (with virtual environment activated):  
+uvicorn main:app --reload  
+The API will be available at http://127.0.0.1:8000  
+# Starting the Frontend Development Server
+From the frontend directory (in a separate terminal, NOT in virtual environment):
+npm run dev
+The frontend will be available at http://localhost:5173
+## API Documentation
+Once the backend is running, you can access the interactive API documentation at:
+
+http://127.0.0.1:8000/docs (Swagger UI)  
+http://127.0.0.1:8000/redoc (ReDoc)  
+
+## Testing
+Run the unit tests to ensure everything is working correctly
+bash# Make sure you're in the project root and virtual environment is activated
+pytest test_password.py -v  
+![Test Results](src/assets/pytest.png)
+## Project Structure
+
+main.py - FastAPI application entry point  
+movie.py - Movie-related endpoints  
+user.py - User authentication and management  
+jwt_auth.py - JWT authentication logic  
+movie_model.py - Database models  
+user_model.py - User models  
+db_context.py - Database connection setup  
+frontend/ - Vue.js frontend application  
