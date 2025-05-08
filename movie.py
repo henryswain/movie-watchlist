@@ -92,22 +92,32 @@ async def get_movies(
         # get watched data based on watched_status
         watched_information = []
         if watched_status == "all":
-            print("watched_status == 'all'")
+            # For "all", show all movies in the database
             watched_information = await Watchlist.find_all().to_list()
         elif watched_status == "my":
+            # For "my", show movies added by the current user
             watched_information = await Watchlist.find(
                 {"user_id": current_user.username}
             ).to_list()
+        elif watched_status in ["watched", "not_watched"]:
+            # For "watched"/"not_watched", filter by both status AND current user
+            watched_information = await Watchlist.find(
+                {"watched_status": watched_status, "user_id": current_user.username}
+            ).to_list()
         else:
-            print("watched_status != 'all")
+            # Fallback for any other status
             watched_information = await Watchlist.find(
                 {"watched_status": watched_status}
             ).to_list()
 
         # Create a dictionary to map movie IDs to their watched status
-        watchlist_map = {doc.watched_id: doc.watched_status for doc in watched_information}
-        
-        watched_ids_as_objects = [ObjectId(doc.watched_id) for doc in watched_information]
+        watchlist_map = {
+            doc.watched_id: doc.watched_status for doc in watched_information
+        }
+
+        watched_ids_as_objects = [
+            ObjectId(doc.watched_id) for doc in watched_information
+        ]
 
         # get movies with the gathered watched information
         movies = await Movie.find({"_id": {"$in": watched_ids_as_objects}}).to_list()
@@ -136,19 +146,19 @@ async def get_movies(
                 added_by=movie.added_by,
                 rating=rating,
                 date_added=movie.date_added,
-                watched_status=movie_watched_status  # Include the watched status
+                watched_status=movie_watched_status,  # Include the watched status
             )
 
             movie_responses.append(movie_response)
 
         return movie_responses
-    
+
     except Exception as e:
         # Log the error and return a more helpful message
         logger.error(f"Error in get_movies: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error getting movies: {str(e)}"
+            detail=f"Error getting movies: {str(e)}",
         )
 
 
