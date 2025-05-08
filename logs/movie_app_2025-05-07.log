@@ -1,0 +1,60 @@
+2025-05-07 18:47:52,498 - INFO - Application starts up...
+2025-05-07 18:47:52,498 - INFO - Application starts up...
+2025-05-07 18:47:52,498 - INFO - Application starts up...
+2025-05-07 18:48:27,922 - INFO - Token validated for user 'aramiscal'. Role: AdminUser
+2025-05-07 18:48:27,922 - INFO - Token validated for user 'aramiscal'. Role: AdminUser
+2025-05-07 18:48:27,922 - INFO - Token validated for user 'aramiscal'. Role: AdminUser
+2025-05-07 18:50:49,711 - INFO - Application shuts down...
+2025-05-07 18:50:49,711 - INFO - Application shuts down...
+2025-05-07 18:50:49,711 - INFO - Application shuts down...
+2025-05-07 18:50:50,469 - INFO - Application starts up...
+2025-05-07 18:51:20,192 - INFO - New user 'testtest' signed up successfully. Role: BasicUser
+2025-05-07 18:51:40,731 - ERROR - Failed login attempt for username 'testtest': Invalid password
+2025-05-07 18:51:46,429 - ERROR - Failed login attempt for username 'test: User not found
+2025-05-07 18:51:51,718 - INFO - User 'aronram' successfully signed in. Role: AdminUser
+2025-05-07 18:52:01,095 - INFO - AdminUser 'aronram' edited movie 'szdgzsef'. Role: AdminUser
+2025-05-07 18:52:01,193 - INFO - new review added for movie 'ijlksef' by user 'aronram'. Rating: 4
+2025-05-07 18:52:15,476 - INFO - AdminUser 'aronram' edited movie 'xzcvrdb'. Role: AdminUser
+2025-05-07 18:52:15,575 - INFO - new review added for movie 'xzcvrdb' by user 'aronram'. Rating: 4
+2025-05-07 19:00:15,541 - INFO - Application shuts down...
+2025-05-07 19:00:16,299 - INFO - Application starts up...
+2025-05-07 19:00:18,934 - INFO - AdminUser 'aronram' edited movie 'xzcvrdb'. Role: AdminUser
+2025-05-07 19:00:19,035 - INFO - Review updated for movie 'xzcvrdb' by user 'aronram'. Rating: 4
+2025-05-07 19:00:27,812 - INFO - AdminUser 'aronram' edited movie 'zxcvzsd'. Role: AdminUser
+2025-05-07 19:00:27,909 - INFO - new review added for movie 'zxcvzsd' by user 'aronram'. Rating: 3
+2025-05-07 22:31:09,429 - INFO - AdminUser 'aronram' edited movie 'zxcvzsd'. Role: AdminUser
+2025-05-07 22:31:09,611 - INFO - Review updated for movie 'zxcvzsd' by user 'aronram'. Rating: 3
+2025-05-07 22:31:23,472 - INFO - User: 'aronram' logged out. Role: AdminUser
+2025-05-07 22:31:36,794 - INFO - New user 'test1' signed up successfully. Role: BasicUser
+2025-05-07 22:31:43,600 - INFO - User 'test1' successfully signed in. Role: BasicUser
+2025-05-07 22:33:47,447 - INFO - Movie 'The Lego Movie' added by user 'test1'. Role: BasicUser 
+2025-05-07 22:33:47,517 - INFO - Review added for movie 'The Lego Movie' by user 'test1'. Rating: 5
+2025-05-07 22:33:55,773 - INFO - User 'test1' edited movie 'The Lego Movie'. Role: BasicUser
+2025-05-07 22:33:55,948 - INFO - Review updated for movie 'The Lego Movie' by user 'test1'. Rating: 3
+2025-05-07 22:33:56,064 - INFO - Watchlist updated for movie 'The Lego Movie' by user 'test1'. Status: not_watched
+2025-05-07 22:34:51,476 - INFO - User: 'test1' logged out. Role: BasicUser
+2025-05-07 22:34:56,489 - ERROR - Failed login attempt for username 'aramiscal': Invalid password
+2025-05-07 22:34:58,100 - INFO - User 'aramiscal' successfully signed in. Role: AdminUser
+2025-05-07 22:35:03,161 - INFO - AdminUser 'aramiscal' edited movie 'slkfjsdklfjlksdfjlsdfjljksdf'. Role: AdminUser
+2025-05-07 22:35:03,338 - INFO - new review added for movie 'slkfjsdklfjlksdfjlsdfjljksdf' by user 'aramiscal'. Rating: 3
+2025-05-07 22:38:08,870 - INFO - AdminUser 'aramiscal' edited movie 'xzcvrdb'. Role: AdminUser
+2025-05-07 22:38:09,056 - INFO - new review added for movie 'xzcvrdb' by user 'aramiscal'. Rating: 5
+2025-05-07 22:39:23,508 - INFO - Application shuts down...
+2025-05-07 22:39:24,261 - INFO - Application starts up...
+2025-05-07 22:39:50,362 - INFO - Admin User 'aramiscal' edited movie 'xzcvrdb'. Role: AdminUser
+2025-05-07 22:39:50,531 - INFO - Review updated for movie 'xzcvrdb' by user 'aramiscal'. Rating: 5
+2025-05-07 22:39:50,648 - INFO - New watchlist entry created for movie 'xzcvrdb' by user 'aramiscal'. Status: not_watched
+2025-05-07 22:39:59,721 - INFO - Admin User 'aramiscal' edited movie 'The Lego Movie'. Role: AdminUser
+2025-05-07 22:39:59,896 - INFO - New review added for movie 'The Lego Movie' by user 'aramiscal'. Rating: 4
+2025-05-07 22:40:00,011 - INFO - New watchlist entry created for movie 'The Lego Movie' by user 'aramiscal'. Status: not_watched
+2025-05-07 22:40:18,514 - INFO - Admin User 'aramiscal' edited movie 'zxcvzsd'. Role: AdminUser
+2025-05-07 22:40:18,705 - INFO - New review added for movie 'zxcvzsd' by user 'aramiscal'. Rating: 2
+2025-05-07 22:40:18,818 - INFO - New watchlist entry created for movie 'zxcvzsd' by user 'aramiscal'. Status: watched
+2025-05-07 22:44:58,925 - INFO - Application shuts down...
+2025-05-07 22:44:59,691 - INFO - Application starts up...
+2025-05-07 22:45:19,192 - INFO - Admin User 'aramiscal' edited movie 'ijlksef'. Role: AdminUser
+2025-05-07 22:45:19,378 - INFO - Admin updated review for movie 'ijlksef' originally added by 'aramiscal2'. Rating: 5
+2025-05-07 22:45:19,614 - INFO - New watchlist entry created for movie 'ijlksef' by user 'aramiscal'. Status: not_watched
+2025-05-07 22:45:42,380 - INFO - Admin User 'aramiscal' edited movie 'xzcvrdb'. Role: AdminUser
+2025-05-07 22:45:42,559 - INFO - Admin updated review for movie 'updated title' originally added by 'aramiscal2'. Rating: 1
+2025-05-07 22:45:42,794 - INFO - Watchlist updated for movie 'updated title' by user 'aramiscal'. Status: not_watched

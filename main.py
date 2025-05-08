@@ -8,15 +8,18 @@ from db_context import init_database
 from movie import movie_router
 from user import user_router
 from db_context import init_database
+from logging_config import setup_logger
+
+logger = setup_logger()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # on startup event
-    print("Application starts...")
+    logger.info("Application starts up...")
     await init_database()
     yield
     # on shutdown event
-    print("Application shuts down...")
+    logger.info("Application shuts down...")
 
 app = FastAPI(title="Vacation App", version="2.0.0", lifespan=lifespan)
 app.add_middleware(

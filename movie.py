@@ -17,8 +17,11 @@ from movie_model import (
 from jwt_auth import get_current_user, TokenData
 from datetime import datetime
 from beanie import PydanticObjectId
+from logging_config import setup_logger
 
 from user_model import User
+
+logger = setup_logger()
 
 movie_router = APIRouter()
 
@@ -48,6 +51,11 @@ async def add_movie(
     # Save to database
     await new_movie.insert()
 
+    # Log movie addition
+    role = current_user.role if current_user else "Anonymous"
+    username = current_user.username if current_user else "anonymous"
+    logger.info(f"Movie '{movie_data.title}' added by user '{username}'. Role: {role} ")
+
     # If the user is logged in, create a review
     if current_user:
         # Create review document
@@ -59,7 +67,9 @@ async def add_movie(
             date_added=datetime.now(),
         )
         await new_review.insert()
-        print("Review saved with ID:", new_review.id)
+        logger.info(
+            f"Review added for movie '{movie_data.title}' by user '{current_user.username}'. Rating: {review_data.rating}"
+        )
 
     # update watchlist
     new_watchlist_indicator = Watchlist(
@@ -195,6 +205,7 @@ async def update_movie(
     # Get movie from database
     movie = await Movie.get(movie_id)
     if not movie:
+        logger.error(f"Update movie failed: Movie with ID={movie_id} not found")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Movie with ID={movie_id} not found",
@@ -208,11 +219,21 @@ async def update_movie(
 
         # If not admin and not the creator, forbid the action
         if not is_admin and movie.added_by != current_user.username:
+            logger.warning(
+                f"Unauthorized movie edit attempt: User '{current_user.username}' tried to edit movie '{movie.title}' created by '{movie.added_by}'"
+            )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You can only edit movies that you created.",
             )
+
+        # Log the edit operation
+        admin_str = "Admin " if is_admin else ""
+        logger.info(
+            f"{admin_str}User '{current_user.username}' edited movie '{movie.title}'. Role: {current_user.role}"
+        )
     else:
+        logger.error("Unauthenticated movie edit attempt")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required to edit movies.",
@@ -225,36 +246,127 @@ async def update_movie(
     # Save changes
     await movie.save()
 
-    # If the movie has a rating and the user is logged in, update or create a review
-    if review_data.rating > 0 and current_user:
-        # Check if user already has a review for this movie
-        existing_review = await Review.find_one(
-            Review.movie_id == movie_id, Review.user_id == current_user.username
-        )
+    # MODIFIED: Review handling with special admin case
+    if review_data.rating > 0:
+        if is_admin:
+            # If admin, update or create review for the ORIGINAL CREATOR
+            # This ensures the review shows up for all users
+            existing_review = await Review.find_one(
+                Review.movie_id == movie_id,
+                Review.user_id == movie.added_by,  # Use movie creator's username
+            )
 
-        if existing_review:
-            # Update existing review
-            existing_review.rating = review_data.rating
-            existing_review.review = review_data.review
-            await existing_review.save()
-            print(f"Review updated for movie ID: {movie_id}")
+            if existing_review:
+                # Update existing review as admin
+                existing_review.rating = review_data.rating
+                existing_review.review = review_data.review
+                await existing_review.save()
+                logger.info(
+                    f"Admin updated review for movie '{movie.title}' originally added by '{movie.added_by}'. Rating: {review_data.rating}"
+                )
+            else:
+                # Create new review as admin for the original creator
+                new_review = Review(
+                    movie_id=movie_id,
+                    user_id=movie.added_by,  # Use movie creator's username
+                    rating=review_data.rating,
+                    review=review_data.review,
+                    date_added=datetime.now(),
+                )
+                await new_review.insert()
+                logger.info(
+                    f"Admin created new review for movie '{movie.title}' on behalf of '{movie.added_by}'. Rating: {review_data.rating}"
+                )
+
+            # Also update/create the admin's personal review
+            admin_review = await Review.find_one(
+                Review.movie_id == movie_id, Review.user_id == current_user.username
+            )
+
+            if admin_review:
+                admin_review.rating = review_data.rating
+                admin_review.review = review_data.review
+                await admin_review.save()
+            else:
+                new_admin_review = Review(
+                    movie_id=movie_id,
+                    user_id=current_user.username,
+                    rating=review_data.rating,
+                    review=review_data.review,
+                    date_added=datetime.now(),
+                )
+                await new_admin_review.insert()
+
         else:
-            # Create new review
-            new_review = Review(
-                movie_id=movie_id,
+            # Regular user flow - update their own review
+            existing_review = await Review.find_one(
+                Review.movie_id == movie_id, Review.user_id == current_user.username
+            )
+
+            if existing_review:
+                # Update existing review
+                existing_review.rating = review_data.rating
+                existing_review.review = review_data.review
+                await existing_review.save()
+                logger.info(
+                    f"Review updated for movie '{movie.title}' by user '{current_user.username}'. Rating: {review_data.rating}"
+                )
+            else:
+                # Create new review
+                new_review = Review(
+                    movie_id=movie_id,
+                    user_id=current_user.username,
+                    rating=review_data.rating,
+                    review=review_data.review,
+                    date_added=datetime.now(),
+                )
+                await new_review.insert()
+                logger.info(
+                    f"New review added for movie '{movie.title}' by user '{current_user.username}'. Rating: {review_data.rating}"
+                )
+
+    # Watchlist handling code remains unchanged
+    try:
+        # First check for ANY watchlist entry for this movie
+        existing_watchlists = await Watchlist.find({"watched_id": movie_id}).to_list()
+
+        # Check if there's an entry specifically for this user
+        user_watchlist = None
+        for watchlist in existing_watchlists:
+            if watchlist.user_id == current_user.username:
+                user_watchlist = watchlist
+                break
+
+        if user_watchlist:
+            # Update existing watchlist entry for this user
+            user_watchlist.watched_status = watchlist_data.watched_status
+            await user_watchlist.save()
+            logger.info(
+                f"Watchlist updated for movie '{movie.title}' by user '{current_user.username}'. Status: {watchlist_data.watched_status}"
+            )
+        else:
+            # Generate a truly unique ID using an ObjectId
+            from bson import ObjectId
+
+            unique_id = str(ObjectId())
+
+            # Create new watchlist entry with the unique ID
+            new_watchlist = Watchlist(
+                id=unique_id,  # Use a completely new ID
+                watched_id=movie_id,
                 user_id=current_user.username,
-                rating=review_data.rating,
-                review=review_data.review,
+                watched_status=watchlist_data.watched_status,
                 date_added=datetime.now(),
             )
-            await new_review.insert()
-            print(f"Review created for movie ID: {movie_id}")
+            await new_watchlist.insert()
+            logger.info(
+                f"New watchlist entry created for movie '{movie.title}' by user '{current_user.username}'. Status: {watchlist_data.watched_status}"
+            )
+    except Exception as e:
+        error_message = f"Error updating watchlist for movie '{movie.title}': {str(e)}"
+        logger.error(error_message)
+        # Continue execution rather than crashing
 
-    existing_watchlist = await Watchlist.find_one(
-        {"watched_id": movie_id, "user_id": current_user.username}
-    )
-    existing_watchlist.watched_status = watchlist_data.watched_status
-    await existing_watchlist.save()
     return movie
 
 
@@ -269,6 +381,7 @@ async def delete_movie(
     # Get movie from database
     movie = await Movie.get(ObjectId(movie_id))
     if not movie:
+        logger.error(f"Delete movie failed: Movie with ID={movie_id} not found")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Movie with ID={movie_id} not found",
@@ -282,10 +395,19 @@ async def delete_movie(
 
         # If not admin and not the creator, forbid the action
         if not is_admin and movie.added_by != current_user.username:
+            logger.warning(
+                f"Unauthorized movie delete attempt: User '{current_user.username}' tried to delete movie '{movie.title}' created by '{movie.added_by}'"
+            )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You can only delete movies that you created.",
             )
+
+        # Log the delete operation
+        admin_str = "Admin " if is_admin else ""
+        logger.info(
+            f"{admin_str}User '{current_user.username}' deleted movie '{movie.title}'. Role: {current_user.role}"
+        )
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

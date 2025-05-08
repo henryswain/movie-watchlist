@@ -16,8 +16,12 @@ async def init_database():
         connection_string += "&tlsAllowInvalidCertificates=true"
     else:
         connection_string += "?tlsAllowInvalidCertificates=true"
-
-    client = AsyncIOMotorClient(connection_string)
-    logger.info("database client created")
-    db = client["MovieTracker"]
-    await init_beanie(database=db, document_models=[User, Movie, Review, Watchlist])
+    try:
+        client = AsyncIOMotorClient(connection_string)
+        logger.info("database client created")
+        db = client["MovieTracker"]
+        await init_beanie(database=db, document_models=[User, Movie, Review, Watchlist])
+        logger.info("Beanie ORM initialized successfully with all document models")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {str(e)}")
+        raise
