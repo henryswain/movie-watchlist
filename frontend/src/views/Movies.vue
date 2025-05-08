@@ -12,18 +12,37 @@
             @click="filterMovies('watched')"
             class="btn btn-outline-success"
           >
-            Watched
+            My Watched
           </button>
           <button
             @click="filterMovies('not_watched')"
             class="btn btn-outline-warning"
           >
-            To Watch
+            My To Watch
           </button>
           <!-- New My Movies button -->
           <button @click="filterMovies('my')" class="btn btn-outline-secondary">
             My Movies
           </button>
+        </div>
+
+        <!-- Filter description -->
+        <div class="filter-description mb-3 text-center">
+          <span v-if="currentFilter === 'all'">
+            <i class="fas fa-info-circle"></i> Showing all movies in the
+            database
+          </span>
+          <span v-else-if="currentFilter === 'watched'">
+            <i class="fas fa-check-circle"></i> Showing movies you've marked as
+            watched
+          </span>
+          <span v-else-if="currentFilter === 'not_watched'">
+            <i class="fas fa-clock"></i> Showing movies in your to-watch list
+          </span>
+          <span v-else-if="currentFilter === 'my'">
+            <i class="fas fa-user"></i> Showing movies you've added to the
+            database
+          </span>
         </div>
 
         <div>
@@ -40,11 +59,25 @@
           </button>
         </div>
 
+        <!-- No movies found message -->
         <div
-  v-for="movie in filteredData"
-  :key="movie.id"
-  :class="`movie-card ${movie.watched_status === 'watched' ? 'watched' : 'unwatched'}`"
->
+          v-if="filteredData.length === 0"
+          class="text-center p-4 bg-light rounded mb-3"
+        >
+          <i class="fas fa-film fa-2x mb-2 text-muted"></i>
+          <p class="mb-0">No movies found for this filter.</p>
+          <p class="text-muted" v-if="currentFilter !== 'all'">
+            Try another filter or add some movies.
+          </p>
+        </div>
+
+        <div
+          v-for="movie in filteredData"
+          :key="movie.id"
+          :class="`movie-card ${
+            movie.watched_status === 'watched' ? 'watched' : 'unwatched'
+          }`"
+        >
           <div class="movie-header">
             <div class="movie-title-rating">
               <h4>{{ movie.title }}</h4>
@@ -1165,7 +1198,7 @@ body {
   margin: 4px 0;
   display: flex;
   align-items: center;
-  color: #333; 
+  color: #333;
 }
 
 .movie-metadata i {
@@ -1218,6 +1251,21 @@ body {
   border-radius: 3px;
   margin-left: 5px;
   vertical-align: middle;
+}
+
+.filter-description {
+  background-color: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 15px;
+  border: 1px solid #e9ecef;
+}
+
+.filter-description i {
+  margin-right: 5px;
+  color: #5271ff;
 }
 
 @media (max-width: 768px) {
