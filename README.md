@@ -3,9 +3,9 @@ FilmTrack is a web application for tracking movies you've watched or want to wat
 # Project Overview
 This project combines:
 
-Frontend: Vue.js application with responsive UI
-Backend: FastAPI (Python) REST API
-Database: MongoDB for data storage
+Frontend: Vue.js application with responsive UI  
+Backend: FastAPI (Python) REST API  
+Database: MongoDB for data storage  
 
 # Key Features
 
@@ -46,7 +46,7 @@ Database: MongoDB for data storage
 
 - Create a .env file in the project root (or update my_config.py)  
 - Add your MongoDB connection string:  
-MONGODB_URL=mongodb+srv://yourusername:yourpassword@yourcluster.mongodb.net/filmtrack
+MONGODB_URL=mongodb+srv://yourusername:yourpassword@yourcluster.mongodb.net/filmtrack  
 SECRET_KEY=your_jwt_secret_key
 
 
@@ -69,18 +69,13 @@ The API will be available at http://127.0.0.1:8000
 # Starting the Frontend Development Server
 From the frontend directory (in a separate terminal, NOT in virtual environment):
 npm run dev
-The frontend will be available at http://localhost:5173
-## API Documentation
-Once the backend is running, you can access the interactive API documentation at:
-
-http://127.0.0.1:8000/docs (Swagger UI)  
-http://127.0.0.1:8000/redoc (ReDoc)  
+The frontend will be available at http://localhost:5173 
 
 ## Testing
 Run the unit tests to ensure everything is working correctly
 bash# Make sure you're in the project root and virtual environment is activated
 pytest test_password.py -v  
-![Test Results](src/assets/pytest.png)
+![Test Results](frontend/src/assets/pytest.png)
 ## Project Structure
 
 main.py - FastAPI application entry point  
@@ -91,3 +86,14 @@ movie_model.py - Database models
 user_model.py - User models  
 db_context.py - Database connection setup  
 frontend/ - Vue.js frontend application  
+
+# Demo
+## Login
+- Users must be in the database to login (Update role in the database to switch between user and Admin access)
+![Login Process](frontend/src/assets/Logintest.gif)
+## Basic User
+- Basic can only delete/update movies based on userID
+![Login Process](frontend/src/assets/Basicuser.gif)
+## Admin User
+- Admins can update/delete any movie
+![Login Process](frontend/src/assets/Adminuser.gif)
