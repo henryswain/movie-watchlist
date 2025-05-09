@@ -27,7 +27,6 @@ const router = createRouter({
   routes
 })
 
-// Add a global route guard
 router.beforeEach((to, from, next) => {
   // Check if the route requires authentication
   if (to.matched.some(record => record.meta.requiresAuth)) {
