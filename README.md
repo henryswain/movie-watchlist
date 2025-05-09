@@ -91,10 +91,12 @@ frontend/ - Vue.js frontend application
 # Demo
 ## Login
 - Users must be in the database to login (Update role in the database to switch between user and Admin access)
-![Login Process](frontend/src/assets/Logintest.gif)
+![Login Process](frontend/src/assets/Logintest.gif)  
 ## Basic User
 - Basic can only delete/update movies based on userID
-![Login Process](frontend/src/assets/Basicuser.gif)
+![Basicuser](frontend/src/assets/Basicuser.gif)  
 ## Admin User
 - Admins can update/delete any movie
-![Login Process](frontend/src/assets/Adminuser.gif)
+![Adminuser](frontend/src/assets/Adminuser.gif)  
+## Background Image Upload
+![Uploading images](frontend/src/assets/Upload.gif)
