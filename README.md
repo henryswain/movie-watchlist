@@ -14,6 +14,7 @@ Database: MongoDB for data storage
 - Mark movies as watched/unwatched
 - Write and view movie reviews
 - Filter movies by status (all, watched, not watched, my movies)
+- Import picture as a background (.jpeg, .jpg, .png, .gif)
 - Schedule viewing dates with calendar event export
 - Administrative privileges for managing all content
 
