@@ -1,7 +1,8 @@
 from typing import List, Optional, Annotated
 from bson import ObjectId
 
-from fastapi import APIRouter, Depends, Path, HTTPException, status, Query
+from fastapi import APIRouter, Depends, File, Path, HTTPException, UploadFile, status, Query
+from fastapi.responses import JSONResponse
 from movie_model import (
     Movie,
     MovieRequest,
@@ -18,7 +19,7 @@ from jwt_auth import get_current_user, TokenData
 from datetime import datetime
 from beanie import PydanticObjectId
 from logging_config import setup_logger
-
+import base64
 from user_model import User
 
 logger = setup_logger()
@@ -26,7 +27,38 @@ logger = setup_logger()
 movie_router = APIRouter()
 
 # ----- MOVIE ENDPOINTS -----
+import base64
 
+@movie_router.get("/get-background-photo")
+async def get_background_photo(
+    current_user: Optional[TokenData] = Depends(get_current_user),
+) -> dict:
+    user_data = await User.find_one({"username": current_user.username})
+    
+    if user_data and hasattr(user_data, "photo") and user_data.photo:
+        # If the photo doesn't already have the data URI prefix, add it
+        photo = user_data.photo
+        if not photo.startswith('data:image'):
+            # Determine the image type if possible, or default to JPEG
+            image_type = "jpeg"
+            photo = f"data:image/{image_type};base64,{photo}"
+        
+        return {"photo": photo}
+    return {"photo": ""}
+
+@movie_router.post("/upload-background-photo")
+async def upload_background_photo(
+    photo: UploadFile = File(...),
+    current_user: Optional[TokenData] = Depends(get_current_user),
+) -> dict:
+    contents = await photo.read()
+    encoded_photo = base64.b64encode(contents).decode('utf-8')
+
+    user_data = await User.find_one({"username": current_user.username})
+    user_data.photo = encoded_photo
+    await user_data.save()
+
+    return {"message": "Photo uploaded successfully"}
 
 @movie_router.post("", status_code=status.HTTP_201_CREATED, response_model=Movie)
 async def add_movie(

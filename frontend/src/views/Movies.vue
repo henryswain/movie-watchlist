@@ -1,415 +1,427 @@
 <template>
-  <div class="main-content">
-    <div class="container d-flex justify-content-center align-items-center">
-      <div class="app">
-        <h2 class="text-center mb-4">FilmTrack</h2>
 
-        <div class="filter-buttons mb-3">
-          <button @click="filterMovies('all')" class="btn btn-outline-primary">
-            All Movies
-          </button>
-          <button
-            @click="filterMovies('watched')"
-            class="btn btn-outline-success"
-          >
-            My Watched
-          </button>
-          <button
-            @click="filterMovies('not_watched')"
-            class="btn btn-outline-warning"
-          >
-            My To Watch
-          </button>
-          <!-- New My Movies button -->
-          <button @click="filterMovies('my')" class="btn btn-outline-secondary">
-            My Movies
-          </button>
-        </div>
-
-        <!-- Filter description -->
-        <div class="filter-description mb-3 text-center">
-          <span v-if="currentFilter === 'all'">
-            <i class="fas fa-info-circle"></i> Showing all movies in the
-            database
-          </span>
-          <span v-else-if="currentFilter === 'watched'">
-            <i class="fas fa-check-circle"></i> Showing movies you've marked as
-            watched
-          </span>
-          <span v-else-if="currentFilter === 'not_watched'">
-            <i class="fas fa-clock"></i> Showing movies in your to-watch list
-          </span>
-          <span v-else-if="currentFilter === 'my'">
-            <i class="fas fa-user"></i> Showing movies you've added to the
-            database
-          </span>
-        </div>
-
-        <div>
-          <button
-            type="button"
-            class="btn btn-primary mb-3 w-100"
-            data-bs-toggle="modal"
-            data-bs-target="#addModal"
-          >
-            <div id="addNew">
-              <span>Add New Movie</span>
-              <i class="fas fa-plus"></i>
+  <div :style="bgStyle" class="background-container">
+    <div class="main-content">
+      <div class="container d-flex justify-content-center align-items-center">
+        <div class="app">
+          <h2 class="text-center mb-4">FilmTrack</h2>
+          <form @submit="uploadBackgroundImage" enctype="multipart/form-data">
+            <div>
+              <label for="photo">Choose background photo</label>
+              <input type="file" id="photo" name="photo" @change="handleFileChange"/>
+              <p v-if="fileSizeError" style="color: red;">{{ fileSizeError }}</p>
             </div>
-          </button>
-        </div>
+            <div>
+              <button type="submit">Submit</button>
+            </div>
+          </form>
+          <div class="filter-buttons mb-3">
+            <button @click="filterMovies('all')" class="btn btn-outline-primary">
+              All Movies
+            </button>
+            <button
+              @click="filterMovies('watched')"
+              class="btn btn-outline-success"
+            >
+              My Watched
+            </button>
+            <button
+              @click="filterMovies('not_watched')"
+              class="btn btn-outline-warning"
+            >
+              My To Watch
+            </button>
+            <!-- New My Movies button -->
+            <button @click="filterMovies('my')" class="btn btn-outline-secondary">
+              My Movies
+            </button>
+          </div>
 
-        <!-- No movies found message -->
-        <div
-          v-if="filteredData.length === 0"
-          class="text-center p-4 bg-light rounded mb-3"
-        >
-          <i class="fas fa-film fa-2x mb-2 text-muted"></i>
-          <p class="mb-0">No movies found for this filter.</p>
-          <p class="text-muted" v-if="currentFilter !== 'all'">
-            Try another filter or add some movies.
-          </p>
-        </div>
+          <!-- Filter description -->
+          <div class="filter-description mb-3 text-center">
+            <span v-if="currentFilter === 'all'">
+              <i class="fas fa-info-circle"></i> Showing all movies in the
+              database
+            </span>
+            <span v-else-if="currentFilter === 'watched'">
+              <i class="fas fa-check-circle"></i> Showing movies you've marked as
+              watched
+            </span>
+            <span v-else-if="currentFilter === 'not_watched'">
+              <i class="fas fa-clock"></i> Showing movies in your to-watch list
+            </span>
+            <span v-else-if="currentFilter === 'my'">
+              <i class="fas fa-user"></i> Showing movies you've added to the
+              database
+            </span>
+          </div>
 
-        <div
-          v-for="movie in filteredData"
-          :key="movie.id"
-          :class="`movie-card ${
-            movie.watched_status === 'watched' ? 'watched' : 'unwatched'
-          }`"
-        >
-          <div class="movie-header">
-            <div class="movie-title-rating">
-              <h4>{{ movie.title }}</h4>
-              <div class="movie-ratingidsplay">
-                <span class="star-rating-display">
-                  {{ "★".repeat(movie.user_review?.rating || movie.rating || 0)
-                  }}{{
-                    "☆".repeat(
-                      5 - (movie.user_review?.rating || movie.rating || 0)
-                    )
-                  }}
-                </span>
+          <div>
+            <button
+              type="button"
+              class="btn btn-primary mb-3 w-100"
+              data-bs-toggle="modal"
+              data-bs-target="#addModal"
+            >
+              <div id="addNew">
+                <span>Add New Movie</span>
+                <i class="fas fa-plus"></i>
               </div>
-            </div>
+            </button>
           </div>
 
-          <!-- "Added by" information -->
-          <div class="movie-metadata">
-            <p class="added-by">
-              <i class="fas fa-user"></i> Added by:
-              <span class="user">{{ movie.added_by }}</span>
-            </p>
-            <p clas="added-date">
-              <i class="fas fa-calendar-alt"></i> Added on:
-              <span class="date">{{ formatDate(movie.date_added) }}</span>
+          <!-- No movies found message -->
+          <div
+            v-if="filteredData.length === 0"
+            class="text-center p-4 bg-light rounded mb-3"
+          >
+            <i class="fas fa-film fa-2x mb-2 text-muted"></i>
+            <p class="mb-0">No movies found for this filter.</p>
+            <p class="text-muted" v-if="currentFilter !== 'all'">
+              Try another filter or add some movies.
             </p>
           </div>
-
-          <p class="text-secondary">Comment: {{ movie.comment }}</p>
 
           <div
-            v-if="movie.user_review?.review || movie.review"
-            class="rating-review"
+            v-for="movie in filteredData"
+            :key="movie.id"
+            :class="`movie-card ${
+              movie.watched_status === 'watched' ? 'watched' : 'unwatched'
+            }`"
           >
-            <h5>Why This Rating?</h5>
-            <p>{{ movie.user_review?.review || movie.review }}</p>
-          </div>
-
-          <div class="schedule-viewing">
-            <label :for="`movie-watch-date-${movie.id}`" class="form-label"
-              >Select Viewing Date:</label
-            >
-            <input
-              type="date"
-              :id="`movie-watch-date-${movie.id}`"
-              :name="`movie-watch-date-${movie.id}`"
-              v-model="selectedDates[movie.id]"
-              class="form-control mb-2"
-            />
-            <img
-              :src="icsDownloadImg"
-              alt="Download Calendar"
-              title="Download Calendar Event"
-              @click="downloadICS(movie)"
-              style="cursor: pointer; height: 40px"
-            />
-            <span style="font-size: 0.9rem; margin-left: 10px"
-              >Download Calendar Event</span
-            >
-          </div>
-          <div class="options">
-            <i
-              v-if="isAdmin || movie.added_by === getUsernameFromToken()"
-              @click="tryEditMovie(movie.id)"
-              class="fas fa-edit"
-              data-bs-toggle="modal"
-              data-bs-target="#editModal"
-              :title="
-                isAdmin && movie.added_by !== getUsernameFromToken()
-                  ? 'Edit movie (admin)'
-                  : 'Edit movie'
-              "
-              :class="{
-                'admin-action':
-                  isAdmin && movie.added_by !== getUsernameFromToken(),
-              }"
-            ></i>
-            <i
-              v-else
-              class="fas fa-edit disabled"
-              title="You can only edit movies you added"
-            ></i>
-
-            <i
-              v-if="isAdmin || movie.added_by === getUsernameFromToken()"
-              @click="deleteMovie(movie.id)"
-              class="fas fa-trash-alt"
-              :title="
-                isAdmin && movie.added_by !== getUsernameFromToken()
-                  ? 'Delete movie (admin)'
-                  : 'Delete movie'
-              "
-              :class="{
-                'admin-action':
-                  isAdmin && movie.added_by !== getUsernameFromToken(),
-              }"
-            ></i>
-            <i
-              v-else
-              class="fas fa-trash-alt disabled"
-              title="You can only delete movies you added"
-            ></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add new movie Modal -->
-    <div
-      class="modal fade"
-      id="addModal"
-      tabindex="-1"
-      aria-labelledby="addModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addModalLabel">Add New Movie</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-              id="add-close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form id="form-add" @submit.prevent="addMovieInfo">
-              <div class="mb-3">
-                <label for="add-movie-title" class="form-label"
-                  >Movie Title <i>(required)</i></label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="add-movie-title"
-                  name="add-movie-title"
-                  v-model="titleInput"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="add-movie-comment" class="form-label"
-                  >Comment</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="add-movie-comment"
-                  name="add-movie-comment"
-                  v-model="commentInput"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="add-movie-rating" class="form-label"
-                  >Rating <i>(1 to 5 stars)</i></label
-                >
-                <input
-                  type="hidden"
-                  id="add-movie-rating"
-                  name="add-movie-rating"
-                  :value="ratingInput"
-                />
-                <div
-                  class="star-rating"
-                  aria-labelledby="add-movie-rating-label"
-                >
-                  <span
-                    v-for="i in 5"
-                    :key="i"
-                    class="star"
-                    :class="{ filled: i <= (hoverRating || ratingInput) }"
-                    @mouseover="setHoverRating(i)"
-                    @mouseleave="clearHoverRating"
-                    @click="setRating(i)"
-                    >★</span
-                  >
+            <div class="movie-header">
+              <div class="movie-title-rating">
+                <h4>{{ movie.title }}</h4>
+                <div class="movie-ratingidsplay">
+                  <span class="star-rating-display">
+                    {{ "★".repeat(movie.user_review?.rating || movie.rating || 0)
+                    }}{{
+                      "☆".repeat(
+                        5 - (movie.user_review?.rating || movie.rating || 0)
+                      )
+                    }}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <div class="mb-3">
-                <label for="add-movie-review" class="form-label"
-                  >Why this rating?</label
-                >
-                <textarea
-                  class="form-control"
-                  id="add-movie-review"
-                  name="add-movie-review"
-                  v-model="reviewInput"
-                  rows="3"
-                  placeholder="Explain why you gave this rating..."
-                ></textarea>
-              </div>
+            <!-- "Added by" information -->
+            <div class="movie-metadata">
+              <p class="added-by">
+                <i class="fas fa-user"></i> Added by:
+                <span class="user">{{ movie.added_by }}</span>
+              </p>
+              <p clas="added-date">
+                <i class="fas fa-calendar-alt"></i> Added on:
+                <span class="date">{{ formatDate(movie.date_added) }}</span>
+              </p>
+            </div>
 
-              <div class="mb-3 form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="add-movie-watched"
-                  name="add-movie-watched"
-                  v-model="alreadyWatchedInput"
-                />
-                <label class="form-check-label" for="add-movie-watched"
-                  >Already Watched</label
-                >
-              </div>
-              <div id="msg" class="mb-3"></div>
-              <button type="submit" class="btn btn-primary">Add Movie</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+            <p class="text-secondary">Comment: {{ movie.comment }}</p>
 
-    <!-- Edit existing movie Modal -->
-    <div
-      class="modal fade"
-      id="editModal"
-      tabindex="-1"
-      aria-labelledby="editModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="editModalLabel">
-              Edit Movie
-              <span v-if="isEditingAsAdmin" class="admin-edit-badge"
-                >Admin Edit</span
+            <div
+              v-if="movie.user_review?.review || movie.review"
+              class="rating-review"
+            >
+              <h5>Why This Rating?</h5>
+              <p>{{ movie.user_review?.review || movie.review }}</p>
+            </div>
+
+            <div class="schedule-viewing">
+              <label :for="`movie-watch-date-${movie.id}`" class="form-label"
+                >Select Viewing Date:</label
               >
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-              id="edit-close"
-            ></button>
+              <input
+                type="date"
+                :id="`movie-watch-date-${movie.id}`"
+                :name="`movie-watch-date-${movie.id}`"
+                v-model="selectedDates[movie.id]"
+                class="form-control mb-2"
+              />
+              <img
+                :src="icsDownloadImg"
+                alt="Download Calendar"
+                title="Download Calendar Event"
+                @click="downloadICS(movie)"
+                style="cursor: pointer; height: 40px"
+              />
+              <span style="font-size: 0.9rem; margin-left: 10px"
+                >Download Calendar Event</span
+              >
+            </div>
+            <div class="options">
+              <i
+                v-if="isAdmin || movie.added_by === getUsernameFromToken()"
+                @click="tryEditMovie(movie.id)"
+                class="fas fa-edit"
+                data-bs-toggle="modal"
+                data-bs-target="#editModal"
+                :title="
+                  isAdmin && movie.added_by !== getUsernameFromToken()
+                    ? 'Edit movie (admin)'
+                    : 'Edit movie'
+                "
+                :class="{
+                  'admin-action':
+                    isAdmin && movie.added_by !== getUsernameFromToken(),
+                }"
+              ></i>
+              <i
+                v-else
+                class="fas fa-edit disabled"
+                title="You can only edit movies you added"
+              ></i>
+
+              <i
+                v-if="isAdmin || movie.added_by === getUsernameFromToken()"
+                @click="deleteMovie(movie.id)"
+                class="fas fa-trash-alt"
+                :title="
+                  isAdmin && movie.added_by !== getUsernameFromToken()
+                    ? 'Delete movie (admin)'
+                    : 'Delete movie'
+                "
+                :class="{
+                  'admin-action':
+                    isAdmin && movie.added_by !== getUsernameFromToken(),
+                }"
+              ></i>
+              <i
+                v-else
+                class="fas fa-trash-alt disabled"
+                title="You can only delete movies you added"
+              ></i>
+            </div>
           </div>
-          <div class="modal-body">
-            <form id="form-edit" @submit.prevent="editForm">
-              <div class="mb-3">
-                <label for="edit-movie-title" class="form-label"
-                  >Movie Title <i>(required)</i></label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="edit-movie-title"
-                  name="edit-movie-title"
-                  v-model="editTitleInput"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label for="edit-movie-comment" class="form-label"
-                  >Comment</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="edit-movie-comment"
-                  name="edit-movie-comment"
-                  v-model="editCommentInput"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="edit-movie-rating" class="form-label"
-                  >Rating
-                  <i
-                    >(1 to 5 stars. feel free to leave blank if you don't want
-                    to Rate the movie)</i
-                  ></label
-                >
-                <input
-                  type="hidden"
-                  id="edit-movie-rating"
-                  name="edit-movie-rating"
-                  :value="editRatingInput"
-                />
-                <div
-                  class="star-rating"
-                  aria-labelledby="edit-movie-rating-label"
-                >
-                  <span
-                    v-for="i in 5"
-                    :key="i"
-                    class="star"
-                    :class="{
-                      filled: i <= (editHoverRating || editRatingInput),
-                    }"
-                    @mouseover="setEditHoverRating(i)"
-                    @mouseleave="clearEditHoverRating"
-                    @click="setEditRating(i)"
-                    >★</span
+        </div>
+      </div>
+
+      <!-- Add new movie Modal -->
+      <div
+        class="modal fade"
+        id="addModal"
+        tabindex="-1"
+        aria-labelledby="addModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addModalLabel">Add New Movie</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                id="add-close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="form-add" @submit.prevent="addMovieInfo">
+                <div class="mb-3">
+                  <label for="add-movie-title" class="form-label"
+                    >Movie Title <i>(required)</i></label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="add-movie-title"
+                    name="add-movie-title"
+                    v-model="titleInput"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="add-movie-comment" class="form-label"
+                    >Comment</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="add-movie-comment"
+                    name="add-movie-comment"
+                    v-model="commentInput"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="add-movie-rating" class="form-label"
+                    >Rating <i>(1 to 5 stars)</i></label
+                  >
+                  <input
+                    type="hidden"
+                    id="add-movie-rating"
+                    name="add-movie-rating"
+                    :value="ratingInput"
+                  />
+                  <div
+                    class="star-rating"
+                    aria-labelledby="add-movie-rating-label"
+                  >
+                    <span
+                      v-for="i in 5"
+                      :key="i"
+                      class="star"
+                      :class="{ filled: i <= (hoverRating || ratingInput) }"
+                      @mouseover="setHoverRating(i)"
+                      @mouseleave="clearHoverRating"
+                      @click="setRating(i)"
+                      >★</span
+                    >
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="add-movie-review" class="form-label"
+                    >Why this rating?</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="add-movie-review"
+                    name="add-movie-review"
+                    v-model="reviewInput"
+                    rows="3"
+                    placeholder="Explain why you gave this rating..."
+                  ></textarea>
+                </div>
+
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="add-movie-watched"
+                    name="add-movie-watched"
+                    v-model="alreadyWatchedInput"
+                  />
+                  <label class="form-check-label" for="add-movie-watched"
+                    >Already Watched</label
                   >
                 </div>
-              </div>
+                <div id="msg" class="mb-3"></div>
+                <button type="submit" class="btn btn-primary">Add Movie</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <div class="mb-3">
-                <label for="edit-movie-review" class="form-label"
-                  >Why this rating?</label
+      <!-- Edit existing movie Modal -->
+      <div
+        class="modal fade"
+        id="editModal"
+        tabindex="-1"
+        aria-labelledby="editModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editModalLabel">
+                Edit Movie
+                <span v-if="isEditingAsAdmin" class="admin-edit-badge"
+                  >Admin Edit</span
                 >
-                <textarea
-                  class="form-control"
-                  id="edit-movie-review"
-                  name="edit-movie-review"
-                  v-model="editReviewInput"
-                  rows="3"
-                  placeholder="Explain why you gave this rating..."
-                ></textarea>
-              </div>
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                id="edit-close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="form-edit" @submit.prevent="editForm">
+                <div class="mb-3">
+                  <label for="edit-movie-title" class="form-label"
+                    >Movie Title <i>(required)</i></label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit-movie-title"
+                    name="edit-movie-title"
+                    v-model="editTitleInput"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit-movie-comment" class="form-label"
+                    >Comment</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="edit-movie-comment"
+                    name="edit-movie-comment"
+                    v-model="editCommentInput"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="edit-movie-rating" class="form-label"
+                    >Rating
+                    <i
+                      >(1 to 5 stars. feel free to leave blank if you don't want
+                      to Rate the movie)</i
+                    ></label
+                  >
+                  <input
+                    type="hidden"
+                    id="edit-movie-rating"
+                    name="edit-movie-rating"
+                    :value="editRatingInput"
+                  />
+                  <div
+                    class="star-rating"
+                    aria-labelledby="edit-movie-rating-label"
+                  >
+                    <span
+                      v-for="i in 5"
+                      :key="i"
+                      class="star"
+                      :class="{
+                        filled: i <= (editHoverRating || editRatingInput),
+                      }"
+                      @mouseover="setEditHoverRating(i)"
+                      @mouseleave="clearEditHoverRating"
+                      @click="setEditRating(i)"
+                      >★</span
+                    >
+                  </div>
+                </div>
 
-              <div class="mb-3 form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="edit-movie-watched"
-                  name="edit-movie-watched"
-                  v-model="editAlreadyWatchedInput"
-                />
-                <label class="form-check-label" for="edit-movie-watched"
-                  >Already Watched</label
-                >
-              </div>
+                <div class="mb-3">
+                  <label for="edit-movie-review" class="form-label"
+                    >Why this rating?</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="edit-movie-review"
+                    name="edit-movie-review"
+                    v-model="editReviewInput"
+                    rows="3"
+                    placeholder="Explain why you gave this rating..."
+                  ></textarea>
+                </div>
 
-              <div id="edit-msg" class="mb-3"></div>
-              <button type="submit" class="btn btn-primary">
-                Update Movie
-              </button>
-            </form>
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="edit-movie-watched"
+                    name="edit-movie-watched"
+                    v-model="editAlreadyWatchedInput"
+                  />
+                  <label class="form-check-label" for="edit-movie-watched"
+                    >Already Watched</label
+                  >
+                </div>
+
+                <div id="edit-msg" class="mb-3"></div>
+                <button type="submit" class="btn btn-primary">
+                  Update Movie
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -418,7 +430,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeMount, computed, watch } from "vue";
+import { ref, onMounted, onBeforeMount, computed, watch, nextTick } from "vue";
 import icsDownloadImg from "@/assets/icsdownload.png";
 import { useRouter } from "vue-router";
 
@@ -428,6 +440,115 @@ const authHeaders = computed(() =>
   token.value ? { Authorization: `Bearer ${token.value}` } : {}
 );
 
+
+const fileInput = ref(null);
+const fileSizeError = ref('');
+const maxSizeInBytes = 500 * 1024; // 500 KB
+
+const handleFileChange = (event) => {
+  console.log("event: ", event)
+  const file = event.target.files[0];
+  console.log("file: ", file)
+
+  if (file) {
+    console.log("file.size: ", )
+    if (file.size > maxSizeInBytes) {
+      fileSizeError.value = 'File size must be 500KB or less.';
+      // Optionally clear the input value
+      if (fileInput.value) {
+        fileInput.value.value = '';
+      }
+    } else {
+      fileSizeError.value = '';
+      // Proceed with handling the valid file
+      console.log('Selected file:', file.name, 'Size:', file.size, 'bytes');
+      // You might want to emit an event or update another ref with the file
+    }
+  } else {
+    fileSizeError.value = ''; // No file selected, clear any error
+  }
+}
+// Define a reactive variable to store the background image URL or a base64 string.
+const backgroundImage = ref('')
+
+// Create a computed style object for the container.
+// This object will update whenever backgroundImage changes.
+const bgStyle = computed(() => {
+  return backgroundImage.value
+    ? {
+        backgroundImage: `url(${backgroundImage.value})`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center'
+      }
+    : {}
+})
+
+
+async function fetchBackgroundImage() {
+  console.log("fetchBackgroundImage called")
+  try {
+    const response = await fetch(`${api}/get-background-photo`, {
+      headers: {
+        ...authHeaders.value,
+      }
+    })
+
+    console.log("fetch backgroundImage response: ", response)
+    const data = await response.json()
+    console.log("data: ", data)
+    
+    // Check if the photo is already formatted as a data URI
+    if (data.photo && data.photo.trim() !== '') {
+      // Add the data URI prefix if it doesn't already have one
+      if (!data.photo.startsWith('data:image')) {
+        backgroundImage.value = `data:image/jpeg;base64,${data.photo}`
+      } else {
+        backgroundImage.value = data.photo
+      }
+      console.log("backgroundImage.value is set")
+    } else {
+      console.log("No background image data received")
+    }
+  } catch (error) {
+    console.error('Error fetching background image:', error)
+  }
+}
+
+async function uploadBackgroundImage(event) {
+  // Prevent the default form submission behavior
+  event.preventDefault();
+  
+  // Get the file input element
+  const fileInput = event.target.querySelector('#photo');
+
+  // Check if a file was actually selected
+  if (!fileInput.files.length) {
+    console.log("No file selected");
+    return;
+  }
+  
+  // Create a FormData instance and append the first selected file
+  const formData = new FormData();
+  formData.append('photo', fileInput.files[0]);
+
+  try {
+    const response = await fetch(`${api}/upload-background-photo`, {
+      method: "POST",
+      headers: {
+         ...authHeaders.value,
+      },
+      body: formData,
+    });
+
+    const result = await response.json();
+    console.log("Upload response: ", result);
+    await nextTick()
+    fetchBackgroundImage()
+  } catch (err) {
+    console.error("Error uploading photo: ", err);
+  }
+}
 // Watch for token changes
 watch(
   () => localStorage.getItem("access_token"),
@@ -960,10 +1081,20 @@ onMounted(() => {
   }
 
   refreshMovies();
+  fetchBackgroundImage()
+
 });
 </script>
 
 <style scoped>
+
+.background-container {
+  width: 100vw;
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, -50%);
+}
 /* Styles remain unchanged */
 html,
 body {
@@ -976,6 +1107,7 @@ body {
 }
 
 .main-content {
+  padding-top: 20px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;

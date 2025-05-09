@@ -11,7 +11,7 @@ from jwt_auth import (
     create_access_token,
     decode_jwt_token,
 )
-from user_model import User, UserDto, UserRequest, ensure_admin_role
+from user_model import TokenValidationResponse, User, UserDto, UserRequest, ensure_admin_role
 from logging_config import setup_logger
 
 logger = setup_logger()
@@ -106,14 +106,16 @@ async def signup_user(user_request: UserRequest) -> dict:
 
     return {"message": "User created successfully"}
 
-@user_router.get("/validate-token")
-async def validate_token(token_data: Annotated[TokenData, Depends(get_user)]) -> list[UserDto]:
+
+
+@user_router.get("/validate-token", response_model=TokenValidationResponse)
+async def validate_token(token_data: Annotated[TokenData, Depends(get_user)]) -> TokenValidationResponse:
     logger.info(f"Token validated for user '{token_data.username}'. Role: {token_data.role}")
-    return {
-        "username": token_data.username,
-        "role": token_data.role,
-        "valid": True
-    }
+    return TokenValidationResponse(
+        username=token_data.username,
+        role=token_data.role,
+        valid=True
+    )
 
 @user_router.post("/logout")
 async def logout_user(token_data: Annotated[TokenData, Depends(get_user)]) -> dict:

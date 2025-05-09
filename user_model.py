@@ -1,3 +1,4 @@
+from typing import Optional
 from beanie import Document
 from fastapi import HTTPException, status
 from pydantic import BaseModel
@@ -10,6 +11,7 @@ class User(Document):
     email: str
     password: str  # hash & salted password in the database
     role: str = "BasicUser"
+    photo: Optional[str] = None 
 
     class Settings:
         name = "users"
@@ -24,12 +26,17 @@ class UserRequest(BaseModel):
     email: str
     password: str  # plain text from user input
 
+class TokenValidationResponse(BaseModel):
+    username: str
+    role: str
+    valid: bool
 
 class UserDto(BaseModel):
     id: str
     username: str
     email: str
     role: str
+    photo: Optional[str] = None 
 
 
 def ensure_admin_role(user: TokenData | None):
