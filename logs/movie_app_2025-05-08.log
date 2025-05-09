@@ -265,3 +265,22 @@
 2025-05-08 19:54:54,911 - INFO - Application starts up...
 2025-05-08 19:55:34,354 - INFO - Application shuts down...
 2025-05-08 19:55:34,876 - INFO - Application starts up...
+2025-05-08 21:16:14,401 - INFO - Application starts up...
+2025-05-08 21:17:12,425 - INFO - Token validated for user 'testing'. Role: BasicUser
+2025-05-08 21:17:19,284 - INFO - User: 'testing' logged out. Role: BasicUser
+2025-05-08 21:17:26,724 - INFO - User 'aramiscal' successfully signed in. Role: AdminUser
+2025-05-08 21:18:25,601 - INFO - Token validated for user 'aramiscal'. Role: AdminUser
+2025-05-08 21:18:27,529 - INFO - User: 'aramiscal' logged out. Role: AdminUser
+2025-05-08 21:18:32,181 - ERROR - Failed login attempt for username 'aramiscal': Invalid password
+2025-05-08 21:18:33,240 - INFO - User 'aramiscal' successfully signed in. Role: AdminUser
+2025-05-08 21:22:40,674 - INFO - User: 'aramiscal' logged out. Role: AdminUser
+2025-05-08 21:22:45,296 - INFO - User 'aramiscal' successfully signed in. Role: AdminUser
+2025-05-08 21:26:57,033 - INFO - Token validated for user 'aramiscal'. Role: AdminUser
+2025-05-08 21:27:02,838 - INFO - Token validated for user 'aramiscal'. Role: AdminUser
+2025-05-08 21:27:20,685 - INFO - Token validated for user 'aramiscal'. Role: AdminUser
+2025-05-08 21:27:21,711 - INFO - User: 'aramiscal' logged out. Role: AdminUser
+2025-05-08 21:27:25,670 - INFO - User 'testing' successfully signed in. Role: BasicUser
+2025-05-08 21:28:25,696 - INFO - Token validated for user 'testing'. Role: BasicUser
+2025-05-08 21:28:26,861 - INFO - User: 'testing' logged out. Role: BasicUser
+2025-05-08 21:28:31,781 - ERROR - Failed login attempt for username 'aramicsal: User not found
+2025-05-08 21:28:39,254 - INFO - User 'aramiscal' successfully signed in. Role: AdminUser
