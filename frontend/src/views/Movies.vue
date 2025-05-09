@@ -195,9 +195,10 @@
           </div>
         </div>
       </div>
-
-      <!-- Add new movie Modal -->
-      <div
+    </div>
+  </div>
+        <!-- Add new movie Modal -->
+        <div
         class="modal fade"
         id="addModal"
         tabindex="-1"
@@ -425,8 +426,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
